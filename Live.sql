@@ -1,3 +1,6 @@
+CREATE DATABASE liveShopping;
+\c liveShopping;
+
 CREATE TABLE Users(
    id_user SERIAL,
    email VARCHAR(255)  NOT NULL,
@@ -35,11 +38,11 @@ CREATE TABLE Size(
 );
 
 CREATE TABLE Item_size(
-   id_itrem_size SERIAL,
+   id_item_size SERIAL,
    value_size VARCHAR(50) ,
    id_size INTEGER NOT NULL,
    id_item INTEGER NOT NULL,
-   PRIMARY KEY(id_itrem_size),
+   PRIMARY KEY(id_item_size),
    FOREIGN KEY(id_size) REFERENCES Size(id_size),
    FOREIGN KEY(id_item) REFERENCES Item(id_item)
 );
@@ -49,9 +52,9 @@ CREATE TABLE Items_stock(
    out_item INTEGER,
    in_item VARCHAR(50) ,
    date_move TIMESTAMP NOT NULL,
-   id_itrem_size INTEGER NOT NULL,
+   id_item_size INTEGER NOT NULL,
    PRIMARY KEY(id_item_stock),
-   FOREIGN KEY(id_itrem_size) REFERENCES Item_size(id_itrem_size)
+   FOREIGN KEY(id_item_size) REFERENCES Item_size(id_item_size)
 );
 
 CREATE TABLE Promotion(
@@ -91,10 +94,10 @@ CREATE TABLE Favorites(
 
 CREATE TABLE Favorite_details(
    id_favorite_detail SERIAL,
-   id_itrem_size INTEGER NOT NULL,
+   id_item_size INTEGER NOT NULL,
    id_favorites INTEGER NOT NULL,
    PRIMARY KEY(id_favorite_detail),
-   FOREIGN KEY(id_itrem_size) REFERENCES Item_size(id_itrem_size),
+   FOREIGN KEY(id_item_size) REFERENCES Item_size(id_item_size),
    FOREIGN KEY(id_favorites) REFERENCES Favorites(id_favorites)
 );
 
@@ -111,10 +114,10 @@ CREATE TABLE Bag(
 
 CREATE TABLE Bag_details(
    id_bag_detail SERIAL,
-   id_itrem_size INTEGER NOT NULL,
+   id_item_size INTEGER NOT NULL,
    id_bag INTEGER NOT NULL,
    PRIMARY KEY(id_bag_detail),
-   FOREIGN KEY(id_itrem_size) REFERENCES Item_size(id_itrem_size),
+   FOREIGN KEY(id_item_size) REFERENCES Item_size(id_item_size),
    FOREIGN KEY(id_bag) REFERENCES Bag(id_bag)
 );
 
@@ -149,7 +152,7 @@ CREATE TABLE Live_details(
 
 CREATE TABLE State_commande(
    id_state SERIAL,
-   name_state VARCHAR(50)  NOT NULL,
+   name_state VARCHAR(255)  NOT NULL,
    PRIMARY KEY(id_state)
 );
 

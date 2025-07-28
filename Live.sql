@@ -1,3 +1,5 @@
+-- Active: 1748293822835@@127.0.0.1@5432@liveshopping
+
 CREATE DATABASE liveShopping;
 \c liveShopping;
 

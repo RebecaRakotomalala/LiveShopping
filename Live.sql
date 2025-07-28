@@ -23,6 +23,7 @@ CREATE TABLE Category(
 
 CREATE TABLE Item(
    id_item SERIAL,
+   images BIGINT,
    name_item VARCHAR(255)  NOT NULL,
    id_seller INTEGER NOT NULL,
    id_category INTEGER NOT NULL,

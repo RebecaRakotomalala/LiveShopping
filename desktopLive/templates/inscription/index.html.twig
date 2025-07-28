@@ -1,0 +1,15 @@
+{# templates/inscription/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Inscription</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(inscriptionForm) }}
+        {{ form_widget(inscriptionForm) }}
+        <button class="btn btn-primary">S'inscrire</button>
+    {{ form_end(inscriptionForm) }}
+{% endblock %}

@@ -47,7 +47,11 @@ final class LoginController extends AbstractController
                 ]);
 
                 $this->addFlash('success', 'Connexion réussie !');
-                return $this->redirectToRoute('app_dashboard'); // Modifie selon ta route d'accueil
+                if ($user->isSeller()) {
+                    return $this->redirectToRoute('app_dashboard'); // dashboard/index.html.twig
+                } else {
+                    return $this->redirectToRoute('app_client'); // client/index.html.twig
+                }
             }
         }
 

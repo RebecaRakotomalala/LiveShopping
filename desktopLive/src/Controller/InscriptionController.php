@@ -38,19 +38,16 @@ final class InscriptionController extends AbstractController
 
             $em->persist($user);
             $em->flush();
+            $request->attributes->set('from_registration', true);
+            $request->attributes->set('is_seller', $user->isSeller());
 
-            // Connexion automatique
             $response = $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,
                 $request
             );
 
-            // Gérer le "remember me" si coché
             if ($form->has('remember_me') && $form->get('remember_me')->getData()) {
-                // Rien à faire ici : Symfony gère ça automatiquement grâce à ton authenticator
-                // À condition qu’il utilise `AbstractLoginFormAuthenticator`
-                // et que la config `remember_me` est activée dans security.yaml
             }
 
             return $response;
@@ -64,10 +61,6 @@ final class InscriptionController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // if ($this->getUser()) {
-        //     return $this->redirectToRoute('target_path');
-        // }
-
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user

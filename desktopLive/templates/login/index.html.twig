@@ -6,8 +6,13 @@
 {% block body %}
     <div class="login-container">
         <h1>Sign<div class="text-color">In</div></h1>
+        {% if log_message is defined %}
+            <script>
+                console.log("{{ log_message|e('js') }}");
+            </script>
+        {% endif %}
 
-        <form method="post" action="{{ path('app_login') }}">
+        <form method="POST" action="{{ path('app_connection') }}">
             {% if error %}
                 <div class="alert">{{ error }}</div>
             {% endif %}
@@ -21,7 +26,7 @@
             </div>
 
             <div class="remember-me">
-                <input type="checkbox" id="remember_me" name="_remember_me">
+                <input type="checkbox" id="remember_me" name="_remember_me" />
                 <label for="remember_me">Remember me</label>
             </div>
 
@@ -30,7 +35,7 @@
             <button type="submit">Login</button>
 
             <div class="links">
-                Need an account? <a href="#">Sign up here</a><br>
+                Need an account? <a href="{{ path('app_inscription') }}">Sign up here</a><br>
                 <a href="#">Forget your password</a>
             </div>
         </form>

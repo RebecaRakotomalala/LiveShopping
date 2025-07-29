@@ -12,13 +12,19 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class LoginController extends AbstractController
 {
-    #[Route('/login', name: 'app_login')]
+    #[Route('/connection', name: 'app_connection')]
     public function login(
         Request $request,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher
     ): Response {
         $error = null;
+
+        if ($request->isMethod('POST')) {
+            $logMessage = 'Formulaire POST reçu';
+        } else {
+            $logMessage = 'Page affichée sans soumission';
+        }
 
         if ($request->isMethod('POST')) {
             $username = $request->request->get('username');
@@ -41,12 +47,17 @@ final class LoginController extends AbstractController
                 ]);
 
                 $this->addFlash('success', 'Connexion réussie !');
-                return $this->redirectToRoute('app_home'); // Modifie selon ta route d'accueil
+                if ($user->isSeller()) {
+                    return $this->redirectToRoute('app_dashboard'); // dashboard/index.html.twig
+                } else {
+                    return $this->redirectToRoute('app_client'); // client/index.html.twig
+                }
             }
         }
 
         return $this->render('login/index.html.twig', [
             'error' => $error,
+            'log_message' => $logMessage,
         ]);
     }
 }

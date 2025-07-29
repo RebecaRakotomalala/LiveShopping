@@ -11,15 +11,6 @@
     <div class="login-container">
         <h1>Sign<div class="text-color">Up</div></h1>
 
-        {% for message in app.flashes('success') %}
-            <div class="alert alert-success alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        {% endfor %}
-
         {{ form_start(inscriptionForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             <div class="form-group">
                 {{ form_widget(inscriptionForm.username, {'attr': {'class': 'form-control'}}) }}

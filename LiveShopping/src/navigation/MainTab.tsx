@@ -1,8 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MainTabParamList } from './types';
-import HomeScreen from '../screens/Home/HomeScreen';
-import LiveScreen from '../screens/Live/LiveScreen';
-import ProfileScreen from '../screens/Profile/ProfileScreen';
+import HomeScreen from '@/screens/Home/HomeScreen';
+import LiveScreen from '@/screens/Live/LiveScreen';
+import ProfileScreen from '@/screens/Profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 

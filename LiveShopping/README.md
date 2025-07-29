@@ -29,3 +29,11 @@ ShopLiveApp/
 ├── index.js
 ├── metro.config.js
 └── package.json
+
+
+
+
+npm outdated
+
+
+npm update

@@ -23,13 +23,34 @@ class InscriptionFormType extends AbstractType
         $countryChoices = array_combine($countries, $countries);
 
         $builder
-            ->add('email')
-            ->add('username')
-            ->add('contact')
-            ->add('address')
+            ->add('email', null, [
+                'label' => 'Adresse email',
+                'attr' => [
+                    'placeholder' => 'Email'
+                ]
+            ])
+            ->add('username', null, [
+                'label' => 'Nom d\'utilisateur',
+                'attr' => [
+                    'placeholder' => 'Username'
+                ]
+            ])
+            ->add('contact', null, [
+                'label' => 'Numéro de téléphone',
+                'attr' => [
+                    'placeholder' => 'Contact'
+                    ]
+            ])
+            ->add('address', null, [
+                'label' => 'Adresse postale',
+                'attr' => [
+                    'placeholder' => 'Adress',
+                    'rows' => 3
+                ]
+            ])
             ->add('country', ChoiceType::class, [
                 'choices' => $countryChoices,
-                'placeholder' => 'Choisissez un pays',
+                'placeholder' => 'Country',
             ])
             ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
@@ -41,10 +62,18 @@ class InscriptionFormType extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
+                'attr' => [
+                    'placeholder' => 'Password'
+                ]
             ])
             ->add('isSeller', CheckboxType::class, [
                 'required' => false,
-                'label' => 'Vendeur ?'
+                'label' => 'Is seller'
+            ])
+            ->add('remember_me', CheckboxType::class, [
+                'label' => 'Remember me',
+                'mapped' => false,
+                'required' => false,
             ]);
     }
 

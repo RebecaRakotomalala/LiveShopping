@@ -9,4 +9,6 @@ composer require symfony/security-bundle
 composer require symfony/form symfony/validator
 php bin/console make:form InscriptionForm 
 php bin/console make:controller InscriptionController 
-composer require symfony/http-client
+composer require symfony/http-
+composer require symfony/asset
+php bin/console make:auth

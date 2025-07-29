@@ -5,10 +5,11 @@ namespace App\Entity;
 use App\Repository\UsersRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
 #[ORM\Table(name: 'Users')]
-class Users implements PasswordAuthenticatedUserInterface
+class Users implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -40,6 +41,12 @@ class Users implements PasswordAuthenticatedUserInterface
     private ?bool $isSeller = null;
 
     // Getters et setters
+
+    public function getRoles(): array
+    {
+        // retourne toujours un rôle au minimum
+        return ['ROLE_USER'];
+    }
 
     public function getId(): ?int
     {
@@ -133,4 +140,16 @@ class Users implements PasswordAuthenticatedUserInterface
         $this->isSeller = $isSeller;
         return $this;
     }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->username; // ou $this->username si tu veux te connecter avec username
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Si tu stockes un mot de passe en clair temporaire, tu le nettoies ici.
+        // Exemple : $this->plainPassword = null;
+    }
+
 }

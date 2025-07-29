@@ -89,3 +89,13 @@ button:hover {
     color: #567AF4;
     display: inline-block;
 }
+.alert {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    border: 1px solid #f5c2c7;
+    font-weight: 600;
+    text-align: center;
+}

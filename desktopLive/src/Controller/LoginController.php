@@ -29,26 +29,19 @@ final class LoginController extends AbstractController
 
             if (!$user) {
                 $error = 'Nom d’utilisateur invalide.';
+            } elseif (!$hasher->isPasswordValid($user, $password)) {
+                $error = 'Mot de passe incorrect.';
             } else {
-                // Debugging ici
-                dump('Mot de passe saisi : ' . $password);
-                dump('Hash en base : ' . $user->getPassword());
-                dump('Est valide ? ', $hasher->isPasswordValid($user, $password));
+                // Authentification réussie : stocke les infos en session
+                $session = $request->getSession();
+                $session->set('user', [
+                    'id' => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'is_seller' => $user->isSeller(), // <--- ici on appelle la méthode isSeller()
+                ]);
 
-                if (!$hasher->isPasswordValid($user, $password)) {
-                    $error = 'Mot de passe incorrect.';
-                } else {
-                    // Authentification réussie : stocker les infos utilisateur dans la session
-                    $session = $request->getSession();
-                    $session->set('user', [
-                        'id' => $user->getId(),
-                        'username' => $user->getUsername(),
-                        'is_seller' => $user->getIsSeller(),
-                    ]);
-
-                    $this->addFlash('success', 'Connexion réussie !');
-                    return $this->redirectToRoute('app_home'); // à adapter
-                }
+                $this->addFlash('success', 'Connexion réussie !');
+                return $this->redirectToRoute('app_home'); // Modifie selon ta route d'accueil
             }
         }
 

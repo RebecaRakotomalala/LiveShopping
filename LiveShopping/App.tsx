@@ -1,12 +1,22 @@
 import React from 'react';
-import { Provider } from 'react-redux';
-import AppNavigator from './src/navigation/AppNavigator';
-import { store } from './src/redux/store';
+import SplashScreen from "./src/splash/index";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import SignInScreen from "./src/screens/Auth/SignInScreen";
+import SignUpScreen from "./src/screens/Auth/SignUpScreen";
 
-export default function App() {
+const Stack = createNativeStackNavigator();
+
+const ExamplePage = () => {
   return (
-    <Provider store={store}>
-      <AppNavigator />
-    </Provider>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Splash" component={SplashScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="signin" component={SignInScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="signup" component={SignUpScreen} options={{headerShown: false}}/>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
+
+export default ExamplePage;

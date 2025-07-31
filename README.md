@@ -11,4 +11,143 @@ php bin/console make:form InscriptionForm
 php bin/console make:controller InscriptionController 
 composer require symfony/http-
 composer require symfony/asset
-php bin/console make:auth
+php bin/console make:
+npm install chart.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{# filepath: templates/components/navbar.html.twig #}
+<nav class="navbar">
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Sales History</a>
+        <a href="#">Items</a>
+    </div>
+    <span class="logo">
+        <span style="color:#567AF4;font-family: 'Inter', Arial, sans-serif;">Live</span><span style="color:#fff;font-family: 'Inter', Arial, sans-serif;">Shop</span>
+    </span>
+    <div class="right-group">
+        <div class="icons">
+            <span class="icon">
+                <!-- Start Live Icon -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
+                    <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
+                </svg>
+            </span>
+            <span class="icon">
+                <!-- Bulle de discussion -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="19" cy="17" rx="12" ry="8" />
+                    <polyline points="13,25 13,29 19,25" />
+                </svg>
+            </span>
+            <span class="icon">
+                <!-- Cloche -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 32c2.5 0 4-1.5 4-3h-8c0 1.5 1.5 3 4 3z"/>
+                    <path d="M29 25V17c0-5.5-4.5-10-10-10s-10 4.5-10 10v8l-2 2v1h24v-1l-2-2z"/>
+                </svg>
+            </span>
+            <span class="icon">
+                <!-- Menu hamburger (3 lignes) -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="8" y1="12" x2="30" y2="12" />
+                    <line x1="8" y1="19" x2="30" y2="19" />
+                    <line x1="8" y1="26" x2="30" y2="26" />
+                </svg>
+            </span>
+        </div>
+    </div>
+</nav>
+<style>
+    .navbar {
+        background: #231f20;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 30px;
+        height: 60px;
+        justify-content: space-between;
+        border-radius: 6px;
+    }
+    .navbar .nav-links {
+        display: flex;
+        gap: 30px;
+    }
+    .navbar a {
+        color: #567AF4;
+        font-family: 'Inter', Arial, sans-serif;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: color 0.2s;
+    }
+    .navbar a:hover {
+        color: #fff;
+    }
+    .navbar .logo {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .navbar .search-bar {
+        background: #eee;
+        border-radius: 20px;
+        border: none;
+        padding: 6px 18px;
+        width: 180px;
+        margin: 0 20px;
+    }
+    .navbar .icons {
+        display: flex;
+        gap: 12px;
+    }
+    .navbar .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* border: 2px solid #567AF4;
+        border-radius: 6px; */
+        width: 38px;
+        height: 38px;
+        background: transparent;
+        margin-right: 2px;
+    }
+    .navbar .icon svg {
+        display: block;
+    }
+    .right-group {
+        display: flex;
+        align-items: center;
+        gap: 16px; /* Ajuste l'espace entre la barre et les icônes */
+    }
+
+    .navbar .search-bar {
+        background: #eee;
+        border-radius: 20px;
+        border: none;
+        padding: 6px 18px;
+        width: 160px;
+        margin: 0;
+        box-shadow: 0 2px 8px rgba(86, 122, 244, 0.15); /* Ajoute un shadow bleu doux */
+        font-family: 'Inter', Arial, sans-serif;
+        font-size: 16px;
+    }
+</style>

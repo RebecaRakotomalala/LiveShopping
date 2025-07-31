@@ -1,0 +1,362 @@
+<nav class="navbar">
+    <div class="nav-links" id="navLinks">
+        <a href="#">Home</a>
+        <a href="#">Favoris List</a>
+        <a href="#">Cart</a>
+    </div>
+
+    <span class="logo">
+        <span class="logo-live">Live</span>
+        <span class="logo-shop">Shop</span>
+    </span>
+
+    <div class="right-group">
+        <input class="search-bar" type="text" placeholder="Recherche...">
+        <div class="icons">
+            <span class="icon">
+                <!-- Loupe -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2">
+                    <circle cx="17" cy="17" r="10" />
+                    <line x1="25" y1="25" x2="36" y2="36" />
+                </svg>
+            </span>
+            <span class="icon">
+                <!-- Bulle -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2">
+                    <ellipse cx="19" cy="17" rx="12" ry="8" />
+                    <polyline points="13,25 13,29 19,25" />
+                </svg>
+            </span>
+            <span class="icon">
+                <!-- Cloche -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2">
+                    <path d="M19 32c2.5 0 4-1.5 4-3h-8c0 1.5 1.5 3 4 3z"/>
+                    <path d="M29 25V17c0-5.5-4.5-10-10-10s-10 4.5-10 10v8l-2 2v1h24v-1l-2-2z"/>
+                </svg>
+            </span>
+            <span class="icon burger" id="burgerMenu" aria-label="Toggle navigation menu" role="button" tabindex="0">
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2.5" stroke-linecap="round">
+                    <line x1="8" y1="12" x2="30" y2="12" />
+                    <line x1="8" y1="19" x2="30" y2="19" />
+                    <line x1="8" y1="26" x2="30" y2="26" />
+                </svg>
+            </span>
+        </div>
+    </div>
+
+    <!-- Menu déroulant (mobile) -->
+    <div class="side-menu" id="sideMenu">
+        <div class="user-profile">
+            {# <div class="username">Username</div> #}
+            <div class="user-menu">
+                <a href="#">Your profile</a>
+                <div class="theme-toggle-container">
+                    <a>Theme change</a>
+                    <label class="theme-toggle">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="theme-toggle-container">
+                    <a href="#">Language change</a>
+                    <label class="theme-toggle">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                </div>
+                <a href="#">Log out</a>
+            </div>
+        </div>
+        <div class="side-menu-links">
+            <a href="#">Home</a>
+            <a href="#">Favoris List</a>
+            <a href="#">Cart</a>
+        </div>
+    </div>
+</nav>
+
+<style>
+    .navbar {
+        background: #231f20;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 30px;
+        height: 60px;
+        justify-content: space-between;
+        border-radius: 6px;
+        position: relative;
+        z-index: 1100;
+    }
+    .nav-links {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+    }
+    .nav-links a {
+        color: #567AF4;
+        font-family: 'Inter', Arial, sans-serif;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        transition: color 0.2s;
+    }
+    .nav-links a:hover {
+        color: #fff;
+    }
+    .logo {
+        font-size: 24px;
+        font-weight: 700;
+        font-family: 'Inter', Arial, sans-serif;
+    }
+    .logo-live {
+        color: #567AF4;
+    }
+    .logo-shop {
+        color: #fff;
+    }
+    .search-bar {
+        background: #eee;
+        border-radius: 20px;
+        border: none;
+        padding: 6px 18px;
+        width: 160px;
+        box-shadow: 0 2px 8px rgba(86, 122, 244, 0.15);
+        font-size: 16px;
+    }
+    .icons {
+        display: flex;
+        gap: 12px;
+    }
+    .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        cursor: pointer;
+    }
+
+    .right-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .side-menu {
+        position: fixed;
+        top: 60px;
+        right: -280px;
+        width: 260px;
+        height: calc(100vh - 60px);
+        background: #231f20;
+        box-shadow: -4px 0 8px rgba(0,0,0,0.3);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        transition: right 0.3s ease;
+        border-radius: 0 0 0 6px;
+        z-index: 1050;
+    }
+
+    .side-menu.active {
+        right: 0;
+    }
+
+    .side-menu-links {
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .side-menu-links a {
+        color: #567AF4;
+        font-family: 'Inter', Arial, sans-serif;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .user-profile {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .username {
+        font-weight: bold;
+        font-size: 18px;
+        color: white;
+    }
+
+    .user-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .user-menu a {
+        color: #567AF4;
+        text-decoration: none;
+        font-family: 'Inter', Arial, sans-serif;
+        font-size: 15px;
+        transition: color 0.2s;
+    }
+
+    .user-menu a:hover {
+        color: white;
+    }
+
+    .theme-toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        font-family: 'Inter', Arial, sans-serif;
+    }
+
+    .theme-toggle {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+
+    .theme-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #567AF4;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+
+    @media (max-width: 768px) {
+        .nav-links {
+            display: none;
+        }
+        .side-menu-links {
+            display: flex !important;
+        }
+    }
+
+    /* Dark theme */
+    body.dark-theme {
+        background-color: #121212;
+    }
+
+    body.dark-theme .navbar {
+        background: #ffffff;
+        color: black;
+    }
+
+    body.dark-theme .nav-links a,
+    body.dark-theme .side-menu-links a {
+        color: #567AF4;
+    }
+
+    body.dark-theme .logo-shop {
+        color: #000;
+    }
+
+    body.dark-theme .search-bar {
+        background: #000;
+        color: #eee;
+        border: 1px solid #444;
+    }
+
+    body.dark-theme .icons svg {
+        stroke: #567AF4;
+    }
+
+    body.dark-theme .side-menu {
+        background: #ffffff;
+        box-shadow: -4px 0 8px rgba(0,0,0,0.1);
+    }
+
+    body.dark-theme .username,
+    body.dark-theme .theme-toggle-container {
+        color: #000;
+    }
+
+    body.dark-theme .user-menu a {
+        color: #567AF4;
+    }
+
+    body.dark-theme .user-menu a:hover {
+        color: #000;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const burger = document.getElementById('burgerMenu');
+        const sideMenu = document.getElementById('sideMenu');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Générer un identifiant unique basé sur le nom d'utilisateur affiché
+        const usernameElement = document.querySelector('.username');
+        let userId = 'guest'; // Valeur par défaut
+
+        if (usernameElement && usernameElement.textContent) {
+            userId = usernameElement.textContent.trim().toLowerCase().replace(/\s+/g, '_');
+        }
+
+        // Clé unique pour le stockage
+        const userThemeKey = `user_theme_${userId}`;
+
+        // Charger le thème spécifique à cet utilisateur
+        const savedTheme = localStorage.getItem(userThemeKey);
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeToggle.checked = true;
+        }
+
+        burger.addEventListener('click', function () {
+            sideMenu.classList.toggle('active');
+        });
+
+        burger.addEventListener('keydown', function(e){
+            if(e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                sideMenu.classList.toggle('active');
+            }
+        });
+
+        themeToggle.addEventListener('change', function () {
+            const isDark = document.body.classList.toggle('dark-theme');
+            // Sauvegarde avec la clé utilisateur-spécifique
+            localStorage.setItem(userThemeKey, isDark ? 'dark' : 'light');
+        });
+    });
+</script>

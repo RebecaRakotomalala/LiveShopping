@@ -1,0 +1,184 @@
+
+{% extends 'admin/baseAdmin.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <form class="date-form" action="" method="post">
+            <div class="form-group">
+                <input type="date" name="dateD" id="dateD" required>
+            </div>
+            <div class="form-group">
+                <input type="date" name="dateF" id="dateF" required>
+            </div>
+            <div class="form-group">
+                <select name="" id="">
+                    <option value="">Shoes</option>
+                    <option value="">Clothes</option>
+                    <option value="">Jewelry</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Search</button>
+        </form>
+
+        <div class="charts-row">
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="trendsChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="cheeseChart"></canvas>
+            </div>
+        </div>
+
+        <div class="best-seller-compact">
+            <h2 class="best-seller-title">Best Seller: <span class="product-name">Running Pro</span></h2>
+            <div class="best-seller-content">
+                <img src="{{ asset('images/shoe1.jpg') }}" alt="Running Pro" class="best-seller-image">
+                <div class="best-seller-details">
+                    <div class="detail-row"><span class="label">Sales:</span> 125</div>
+                    <div class="detail-row"><span class="label">Price:</span> $89.99</div>
+                    <div class="detail-row"><span class="label">Rating:</span> 4.8 ★</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour les options dynamiques
+            const getChartOptions = (title, isDoughnut = false) => {
+                const isDark = document.body.classList.contains('dark-theme');
+                const options = {
+                    responsive: true,
+                    scales: {},
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            color: isDark ? '#F8F9FA' : '#212529',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            labels: {
+                                color: isDark ? '#F8F9FA' : '#212529'
+                            }
+                        }
+                    }
+                };
+
+                if (!isDoughnut) {
+                    options.scales = {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' },
+                            ticks: { color: isDark ? '#F8F9FA' : '#212529' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: isDark ? '#F8F9FA' : '#212529' }
+                        }
+                    };
+                }
+
+                return options;
+            };
+
+            // Initialisation des graphiques
+            const salesChart = new Chart(document.getElementById('salesChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Ventes 2023 (en k€)',
+                        data: [12, 19, 15, 24, 18, 22],
+                        backgroundColor: '#567AF4',
+                        borderColor: '#3A5BCD',
+                        borderWidth: 1
+                    }]
+                },
+                options: getChartOptions('Statistiques des Ventes Mensuelles')
+            });
+
+            const trendsChart = new Chart(document.getElementById('trendsChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Chaussures',
+                            data: [45, 52, 68, 49, 75, 62],
+                            borderColor: '#567AF4',
+                            backgroundColor: 'rgba(86, 122, 244, 0.2)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Vêtements',
+                            data: [32, 41, 35, 51, 42, 55],
+                            borderColor: '#4BC0C0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Bijoux',
+                            data: [18, 25, 22, 30, 26, 35],
+                            borderColor: '#FF9966',
+                            backgroundColor: 'rgba(255, 153, 102, 0.2)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: getChartOptions('Évolution des Ventes par Catégorie')
+            });
+
+            const cheeseCtx = document.getElementById('cheeseChart').getContext('2d');
+            const cheeseChart = new Chart(cheeseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Puma', 'Reebok', 'Converse'],
+                    datasets: [{
+                        data: [15, 15, 10],
+                        backgroundColor: [
+                            '#567AF4',
+                            '#4BC0C0',
+                            '#FF9966'
+                        ],
+                        borderColor: document.body.classList.contains('dark-theme') ? '#2C3034' : '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: getChartOptions('Répartition des articles', true)
+            });
+
+            // Rafraîchissement lors du changement de thème
+            const updateCharts = () => {
+                salesChart.options = getChartOptions('Statistiques des Ventes Mensuelles');
+                trendsChart.options = getChartOptions('Évolution des Ventes par Catégorie');
+                cheeseChart.options = getChartOptions('Détail par Article', true);
+
+                salesChart.update();
+                trendsChart.update();
+                cheeseChart.update();
+            };
+
+            document.getElementById('themeToggle').addEventListener('click', function() {
+                setTimeout(updateCharts, 100);
+            });
+        });
+    </script>
+{% endblock %}

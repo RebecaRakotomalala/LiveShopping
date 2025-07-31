@@ -1,0 +1,251 @@
+/* Améliorations CSS pour le dashboard */
+.dashboard-container {
+    width: 98%;
+    margin: 1% auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.dark-theme .date-form {
+    background: #2C3034;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 1%;
+    border: 1px solid #ddd;
+    border-radius: 0.3rem;
+    font-size: 0.9em;
+}
+
+.date-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 5vw;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 15vw;
+    margin-left: 6vw;
+}
+
+.date-form input[type="date"], .date-form select {
+    padding: 0.625rem; /* 10px/16px */
+    border: 0.0625rem solid #ced4da; /* 1px */
+    border-radius: 0.25rem; /* 4px */
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
+
+    /* Améliorations visuelles */
+    background: white;
+    color: #567AF4;
+    box-shadow: 0 0.0625rem 0.1875rem rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.date-form input[type="date"]:focus, .date-form select:focus {
+    border-color: #567AF4;
+    box-shadow: 0 0 0 0.2rem rgba(86, 122, 244, 0.25);
+}
+
+.date-form input[type="date"]::-webkit-calendar-picker-indicator, .date-form select::-webkit-calendar-picker-indicator {
+    padding: 0.25rem;
+    cursor: pointer;
+    filter: invert(0.5);
+    transition: filter 0.2s;
+}
+
+.date-form input[type="date"]::-webkit-calendar-picker-indicator:hover, .date-form select::-webkit-calendar-picker-indicator:hover {
+    filter: invert(0.3);
+}
+
+.date-form input[type="date"]::-moz-calendar-picker-indicator, .date-form select::-moz-calendar-picker-indicator {
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+.date-form input[type="date"]:disabled, .date-form select:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+
+.dark-theme .form-group input,
+.dark-theme .form-group select {
+    background: #3A3F44;
+    border-color: #4E5257;
+    color: #f8f9fa;
+}
+
+.submit-btn {
+    padding: 1% 2%;
+    background: #567AF4;
+    color: white;
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.submit-btn:hover {
+    background: #3A5BCD;
+}
+
+.charts-row {
+    margin-top: 1%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5%;
+    margin-bottom: 1.5%;
+}
+
+.chart-container {
+    flex: 1;
+    min-width: 30%;
+    height: 30vh;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1%;
+    box-shadow: 0 0.5% 1% rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dark-theme .chart-container {
+    background: #2C3034;
+}
+
+.best-seller-compact {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5%;
+    box-shadow: 0 0.5% 1% rgba(0,0,0,0.1);
+    margin-bottom: 1.5%;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex; /* Nouveau: flex container */
+    flex-wrap: wrap; /* Permet le passage à la ligne si nécessaire */
+    gap: 1.5%; /* Espacement entre éléments */
+    align-items: center; /* Alignement vertical */
+}
+
+.best-seller-title {
+    color: #567AF4;
+    font-size: 1.1em;
+    margin: 0; /* Supprime la marge basse */
+    display: flex;
+    align-items: center;
+    flex: 1 0 auto; /* Prend l'espace nécessaire */
+    min-width: 30%; /* Largeur minimale pour le titre */
+    gap: 5%;
+}
+
+.best-seller-content {
+    display: flex;
+    align-items: center;
+    gap: 3%;
+    flex: 2 0 60%; /* Prend plus d'espace que le titre */
+    min-width: 65%; /* Largeur minimale pour le contenu */
+    gap: 20%;
+}
+
+.best-seller-image {
+    width: 20%; /* Réduit la largeur de l'image */
+    max-width: 90px; /* Taille maximale réduite */
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 0.3rem;
+}
+
+.best-seller-details {
+    flex: 1;
+    font-size: 0.9em;
+    display: flex; /* Nouveau: flex pour les détails */
+    flex-wrap: wrap; /* Permet le passage à la ligne si nécessaire */
+    gap: 5%; /* Espacement entre les éléments */
+}
+
+.detail-row {
+    flex: 1 0 30%; /* Trois colonnes par ligne */
+    min-width: 30%; /* Largeur minimale pour chaque détail */
+    display: flex;
+    margin-bottom: 0; /* Supprime la marge basse */
+}
+
+.label {
+    font-weight: bold;
+    min-width: 40%; /* Réduit la largeur du label */
+    color: #567AF4;
+}
+
+/* Dark mode */
+.dark-theme .best-seller-compact {
+    background: #2C3034;
+}
+
+.dark-theme .product-name,
+.dark-theme .best-seller-details {
+    color: #f8f9fa;
+}
+
+.dark-theme .label {
+    color: #9ab0f7;
+}
+
+/* Media queries pour la responsivité */
+@media (max-width: 1200px) {
+    .chart-container {
+        min-width: 48%;
+    }
+}
+
+@media (max-width: 900px) {
+    .best-seller-compact {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .best-seller-title,
+    .best-seller-content {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .date-form {
+        flex-direction: column;
+        gap: 1.5%;
+    }
+
+    .form-group {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .chart-container {
+        min-width: 100%;
+    }
+
+    .best-seller-content {
+        flex-direction: row; /* Garde l'image et détails côte à côte */
+    }
+
+    .best-seller-details {
+        flex-direction: column; /* Empile les détails verticalement */
+    }
+
+    .detail-row {
+        flex: 1 0 100%; /* Pleine largeur pour chaque détail */
+    }
+}

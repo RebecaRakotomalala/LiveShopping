@@ -49,7 +49,7 @@
         <div class="user-profile">
             {# <div class="username">Username</div> #}
             <div class="user-menu">
-                <a href="#">Your profile</a>
+                <a href="/client/profil">Your profile</a>
                 <div class="theme-toggle-container">
                     <a>Theme change</a>
                     <label class="theme-toggle">
@@ -85,8 +85,10 @@
         height: 60px;
         justify-content: space-between;
         border-radius: 6px;
-        position: relative;
-        z-index: 1100;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
     }
     .nav-links {
         display: flex;
@@ -127,6 +129,7 @@
     .icons {
         display: flex;
         gap: 12px;
+        margin-right: 100px;
     }
     .icon {
         display: flex;
@@ -187,7 +190,7 @@
     .username {
         font-weight: bold;
         font-size: 18px;
-        color: white;
+        color: black;
     }
 
     .user-menu {
@@ -306,7 +309,7 @@
 
     body.dark-theme .username,
     body.dark-theme .theme-toggle-container {
-        color: #000;
+        color: white;
     }
 
     body.dark-theme .user-menu a {

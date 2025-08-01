@@ -34,8 +34,8 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 500)]
     private ?string $country = null;
 
-    #[ORM\Column(type: 'bigint', nullable: true)]
-    private ?int $images = null;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $images = null;
 
     #[ORM\Column(type: 'boolean')]
     private ?bool $isSeller = null;
@@ -119,12 +119,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getImages(): ?int
+    public function getImages(): ?string
     {
         return $this->images;
     }
 
-    public function setImages(?int $images): static
+    public function setImages(?string $images): static
     {
         $this->images = $images;
         return $this;

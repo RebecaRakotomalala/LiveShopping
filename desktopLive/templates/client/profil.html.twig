@@ -13,8 +13,13 @@
         <div class="profile-content">
             <!-- Section Avatar -->
             <div class="avatar-section">
-                <div class="avatar-circle">
-                    {{ user.username|first|upper }}
+                <div class="avatar-circle" id="avatar-preview">
+                    {% if user.images %}
+                        <img src="/uploads/{{ user.images }}" alt="Photo de profil" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    {% else %}
+                        {{ user.username|first|upper }}
+                    {% endif %}
+
                     <div id="edit-btn" class="edit-button" title="Modifier">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -48,7 +53,27 @@
 
                 <!-- Formulaire de modification -->
                 <div id="profile-edit" class="edit-form">
-                    <form method="POST" action="{{ path('app_client_update_profile') }}">
+                    <form method="POST" action="{{ path('app_client_update_profile') }}" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Photo de profil</label>
+                            <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div id="image-preview-container" style="width: 80px; height: 80px; border-radius: 50%; background: #f0f0f0; overflow: hidden;">
+                                    {% if user.images %}
+                                        <img id="image-preview" src="/uploads/{{ user.images }}" style="width:100%; height:100%; object-fit:cover;">
+                                    {% else %}
+                                        <div id="image-preview" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px;">
+                                            {{ user.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="button" onclick="document.getElementById('image-upload').click()" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Choisir une image
+                                </button>
+                            </div>
+                            <input type="hidden" id="image-base64" name="images" value="{{ user.images }}">
+                        </div>
+                        
                         <div class="form-group">
                             <label>Nom d'utilisateur</label>
                             <input type="text" name="username" value="{{ user.username }}">
@@ -86,7 +111,9 @@
             const cancelEdit = document.getElementById('cancel-edit');
             const profileView = document.getElementById('profile-view');
             const profileEdit = document.getElementById('profile-edit');
+            const imageUpload = document.getElementById('image-upload');
             
+            // Gestion de l'affichage du formulaire
             editBtn.addEventListener('click', function() {
                 profileView.style.display = 'none';
                 profileEdit.style.display = 'block';
@@ -95,6 +122,46 @@
             cancelEdit.addEventListener('click', function() {
                 profileEdit.style.display = 'none';
                 profileView.style.display = 'block';
+            });
+            
+            // Gestion de l'upload d'image
+            imageUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const base64 = event.target.result.split(',')[1];
+                        document.getElementById('image-base64').value = base64;
+                        
+                        // Mise à jour de l'aperçu
+                        const preview = document.getElementById('image-preview');
+                        if (preview.tagName === 'IMG') {
+                            preview.src = event.target.result;
+                        } else {
+                            const img = document.createElement('img');
+                            img.id = 'image-preview';
+                            img.src = event.target.result;
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.objectFit = 'cover';
+                            document.getElementById('image-preview-container').innerHTML = '';
+                            document.getElementById('image-preview-container').appendChild(img);
+                        }
+                        
+                        // Mise à jour de l'avatar preview
+                        const avatarPreview = document.getElementById('avatar-preview');
+                        avatarPreview.innerHTML = '';
+                        const avatarImg = document.createElement('img');
+                        avatarImg.src = event.target.result;
+                        avatarImg.style.width = '100%';
+                        avatarImg.style.height = '100%';
+                        avatarImg.style.borderRadius = '50%';
+                        avatarImg.style.objectFit = 'cover';
+                        avatarPreview.appendChild(avatarImg);
+                        avatarPreview.appendChild(document.getElementById('edit-btn'));
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
         });
     </script>

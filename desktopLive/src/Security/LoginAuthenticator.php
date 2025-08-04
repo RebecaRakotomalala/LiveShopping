@@ -49,6 +49,13 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         if ($request->attributes->get('from_registration')) {
+
+            $session = $request->getSession();
+
+            /** @var \App\Entity\Users $user */
+            $user = $token->getUser();
+            $session->set('user', $user);
+
             if ($request->attributes->get('is_seller')) {
                 return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
             } else {

@@ -15,10 +15,10 @@
                 <input type="date" name="dateF" id="dateF" required>
             </div>
             <div class="form-group">
-                <select name="" id="">
-                    <option value="">Shoes</option>
-                    <option value="">Clothes</option>
-                    <option value="">Jewelry</option>
+                <select name="category" id="category" required>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.nameCategory }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <button type="submit" class="submit-btn">Search</button>
@@ -38,17 +38,35 @@
             </div>
         </div>
 
-        <div class="best-seller-compact">
-            <h2 class="best-seller-title">Best Seller: <span class="product-name">Running Pro</span></h2>
-            <div class="best-seller-content">
-                <img src="{{ asset('images/shoe1.jpg') }}" alt="Running Pro" class="best-seller-image">
-                <div class="best-seller-details">
-                    <div class="detail-row"><span class="label">Sales:</span> 125</div>
-                    <div class="detail-row"><span class="label">Price:</span> $89.99</div>
-                    <div class="detail-row"><span class="label">Rating:</span> 4.8 ★</div>
+        {% if bestSeller is not null %}
+            <div class="best-seller-compact">
+                <h2 class="best-seller-title">
+                    Best Seller:
+                    <span class="product-name">{{ bestSeller.name }}</span>
+                </h2>
+
+                <div class="best-seller-content">
+                    <img
+                        src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('images/' ~ bestSeller.image_id) }}"
+                        alt="{{ bestSeller.name }}"
+                        class="best-seller-image"
+                        onerror="this.src='{{ asset('images/shoe1.jpg') }}'"
+                    >
+
+                    <div class="best-seller-details">
+                        <div class="detail-row">
+                            <span class="label">Sales:</span> {{ bestSeller.sales }}
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Price:</span> {{ bestSeller.average_price|number_format(2, '.', ' ') }} €
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Category:</span> {{ bestSeller.category }}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
     </div>
 
 {% endblock %}
@@ -57,6 +75,18 @@
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        const statsMensuelles = {{ stats|json_encode|raw }};
+        const vendeurNom = "{{ defaultSeller.username ?? 'Vendeur inconnu' }}";
+        console.log(vendeurNom);
+
+        const ventesParCategorieParMois = {{ ventesParCategorieParMois|json_encode|raw }};
+
+        const ventesParArticle = {{ ventesParArticle|json_encode|raw }};
+        const categoryNom = "{{ category.nameCategory }}";
+
+        const meilleurVente = {{ bestSeller|json_encode|raw }};
+        console.log(meilleurVente);
+
         document.addEventListener('DOMContentLoaded', function() {
             // Fonction pour les options dynamiques
             const getChartOptions = (title, isDoughnut = false) => {
@@ -96,73 +126,87 @@
                 return options;
             };
 
-            // Initialisation des graphiques
+            // Graphique principal avec évolution mensuelle du CA
             const salesChart = new Chart(document.getElementById('salesChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: statsMensuelles.labels.length > 0 ? statsMensuelles.labels : ['Aucune donnée'],
                     datasets: [{
-                        label: 'Ventes 2023 (en k€)',
-                        data: [12, 19, 15, 24, 18, 22],
+                        label: 'Chiffre d\'affaires mensuel (€)',
+                        data: statsMensuelles.chiffre_affaires.length > 0 ? statsMensuelles.chiffre_affaires : [0],
                         backgroundColor: '#567AF4',
                         borderColor: '#3A5BCD',
                         borderWidth: 1
                     }]
                 },
-                options: getChartOptions('Statistiques des Ventes Mensuelles')
+                options: {
+                    ...getChartOptions('Évolution Mensuelle - ' + vendeurNom),
+
+                    plugins: {
+                        ...getChartOptions('Évolution Mensuelle - ' + vendeurNom).plugins,
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'CA: ' + context.raw.toLocaleString() + '€';
+                                }
+                            }
+                        }
+                    }
+                }
             });
+
+            const colors = [
+                '#567AF4', '#4BC0C0', '#FF9966', '#9966FF', '#FF6384', '#36A2EB'
+            ];
 
             const trendsChart = new Chart(document.getElementById('trendsChart'), {
                 type: 'line',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [
-                        {
-                            label: 'Chaussures',
-                            data: [45, 52, 68, 49, 75, 62],
-                            borderColor: '#567AF4',
-                            backgroundColor: 'rgba(86, 122, 244, 0.2)',
-                            borderWidth: 2,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Vêtements',
-                            data: [32, 41, 35, 51, 42, 55],
-                            borderColor: '#4BC0C0',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderWidth: 2,
-                            tension: 0.3
-                        },
-                        {
-                            label: 'Bijoux',
-                            data: [18, 25, 22, 30, 26, 35],
-                            borderColor: '#FF9966',
-                            backgroundColor: 'rgba(255, 153, 102, 0.2)',
-                            borderWidth: 2,
-                            tension: 0.3
-                        }
-                    ]
+                    labels: ventesParCategorieParMois.labels.length > 0 ? ventesParCategorieParMois.labels : ['Aucune donnée'],
+                    datasets: Object.entries(ventesParCategorieParMois.datasets || {}).map(([cat, data], index) => ({
+                        label: cat,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '33',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }))
                 },
-                options: getChartOptions('Évolution des Ventes par Catégorie')
+                options: getChartOptions('Évolution des Ventes par Catégorie - ' + vendeurNom)
             });
 
             const cheeseCtx = document.getElementById('cheeseChart').getContext('2d');
+            // Préparer les données
+            const cheeseLabels = ventesParArticle && ventesParArticle.datasets
+                ? Object.keys(ventesParArticle.datasets)
+                : [];
+
+            const cheeseData = cheeseLabels.map(label => {
+                const dataArray = ventesParArticle.datasets[label];
+                console.log('→', label, dataArray);
+                return Array.isArray(dataArray)
+                    ? dataArray.reduce((a, b) => a + b, 0)
+                    : 0;
+            });
+
+            // Couleurs dynamiques (ajustables si plus de 6 articles)
+            const cheeseColors = [
+                '#567AF4', '#4BC0C0', '#FF9966', '#9966FF', '#FF6384', '#36A2EB',
+                '#FFC107', '#00BCD4', '#8BC34A', '#FF5722'
+            ];
+
             const cheeseChart = new Chart(cheeseCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Puma', 'Reebok', 'Converse'],
+                    labels: cheeseLabels.length ? cheeseLabels : ['Aucune donnée'],
                     datasets: [{
-                        data: [15, 15, 10],
-                        backgroundColor: [
-                            '#567AF4',
-                            '#4BC0C0',
-                            '#FF9966'
-                        ],
+                        data: cheeseData.length ? cheeseData : [1],
+                        backgroundColor: cheeseColors.slice(0, cheeseLabels.length),
                         borderColor: document.body.classList.contains('dark-theme') ? '#2C3034' : '#FFFFFF',
                         borderWidth: 2
                     }]
                 },
-                options: getChartOptions('Répartition des articles', true)
+                options: getChartOptions('Répartition des articles - ' + categoryNom, true)
             });
 
             // Rafraîchissement lors du changement de thème

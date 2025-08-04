@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\BagRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: BagRepository::class)]
 class Bag
@@ -26,6 +28,9 @@ class Bag
     #[ORM\ManyToOne(targetEntity: Users::class)]
     #[ORM\JoinColumn(name: 'id_seller', referencedColumnName: 'id_user', nullable: false)]
     private ?Users $seller = null;
+
+    #[ORM\OneToMany(mappedBy: 'bag', targetEntity: BagDetails::class)]
+    private Collection $bagDetails;
 
     // Getters & Setters
 
@@ -76,5 +81,13 @@ class Bag
     {
         $this->seller = $seller;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, BagDetails>
+     */
+    public function getBagDetails(): Collection
+    {
+        return $this->bagDetails;
     }
 }

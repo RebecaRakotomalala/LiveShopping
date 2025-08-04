@@ -40,11 +40,7 @@ final class LoginController extends AbstractController
             } else {
                 // Authentification réussie : stocke les infos en session
                 $session = $request->getSession();
-                $session->set('user', [
-                    'id' => $user->getId(),
-                    'username' => $user->getUsername(),
-                    'is_seller' => $user->isSeller(), // <--- ici on appelle la méthode isSeller()
-                ]);
+                $session->set('user', $user);
 
                 $this->addFlash('success', 'Connexion réussie !');
                 if ($user->isSeller()) {

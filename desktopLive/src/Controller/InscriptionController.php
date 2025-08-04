@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Service\InscriptionService;
 use App\Form\InscriptionFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

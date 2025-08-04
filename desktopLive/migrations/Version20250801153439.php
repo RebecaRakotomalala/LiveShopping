@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250728073309 extends AbstractMigration
+final class Version20250801153439 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -39,7 +39,7 @@ final class Version20250728073309 extends AbstractMigration
         $this->addSql('CREATE TABLE follow_seller (id_follow SERIAL NOT NULL, id_client INT NOT NULL, id_seller INT NOT NULL, date_following TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id_follow))');
         $this->addSql('CREATE INDEX IDX_D0BB6D84E173B1B8 ON follow_seller (id_client)');
         $this->addSql('CREATE INDEX IDX_D0BB6D84DD2D6611 ON follow_seller (id_seller)');
-        $this->addSql('CREATE TABLE item (id_item SERIAL NOT NULL, id_seller INT NOT NULL, id_category INT NOT NULL, name_item VARCHAR(255) NOT NULL, PRIMARY KEY(id_item))');
+        $this->addSql('CREATE TABLE item (id_item SERIAL NOT NULL, id_seller INT NOT NULL, id_category INT NOT NULL, images BIGINT DEFAULT NULL, name_item VARCHAR(255) NOT NULL, PRIMARY KEY(id_item))');
         $this->addSql('CREATE INDEX IDX_1F1B251EDD2D6611 ON item (id_seller)');
         $this->addSql('CREATE INDEX IDX_1F1B251E5697F554 ON item (id_category)');
         $this->addSql('CREATE TABLE item_size (id_item_size SERIAL NOT NULL, id_size INT NOT NULL, id_item INT NOT NULL, value_size VARCHAR(50) DEFAULT NULL, PRIMARY KEY(id_item_size))');

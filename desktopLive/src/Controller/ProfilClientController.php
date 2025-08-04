@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 final class ProfilClientController extends AbstractController
 {
@@ -166,7 +167,7 @@ final class ProfilClientController extends AbstractController
             'user' => [
                 'username' => $user->getUsername(),
                 'email' => $user->getEmail(),
-                'address' => $user->getAddress(),
+                'adress' => $user->getAddress(),
                 'country' => $user->getCountry(),
                 'contact' => $user->getContact(),
                 'image' => $user->getImages(),

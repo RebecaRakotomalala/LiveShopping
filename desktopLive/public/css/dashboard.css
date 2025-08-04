@@ -126,100 +126,155 @@
     background: #2C3034;
 }
 
-.best-seller-compact {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1.5%;
-    box-shadow: 0 0.5% 1% rgba(0,0,0,0.1);
-    margin-bottom: 1.5%;
-    width: 100%;
-    box-sizing: border-box;
-    display: flex; /* Nouveau: flex container */
-    flex-wrap: wrap; /* Permet le passage à la ligne si nécessaire */
-    gap: 1.5%; /* Espacement entre éléments */
-    align-items: center; /* Alignement vertical */
-    margin-top: 2%;
+.best-sellers-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
 }
 
-.best-seller-title {
-    color: #567AF4;
-    font-size: 1.1em;
-    margin: 0; /* Supprime la marge basse */
+.best-seller-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s;
+}
+
+.best-seller-card:hover {
+    transform: translateY(-2px);
+}
+
+.best-seller-header {
     display: flex;
     align-items: center;
-    flex: 1 0 auto; /* Prend l'espace nécessaire */
-    min-width: 30%; /* Largeur minimale pour le titre */
-    gap: 5%;
+    gap: 8px;
+}
+
+.best-seller-badge {
+    background: #db1b14;
+    color: #000;
+    font-weight: bold;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.best-seller-rank {
+    background: #333;
+    color: white;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .best-seller-content {
     display: flex;
+    gap: 12px;
     align-items: center;
-    gap: 3%;
-    flex: 2 0 60%; /* Prend plus d'espace que le titre */
-    min-width: 65%; /* Largeur minimale pour le contenu */
-    gap: 20%;
 }
 
 .best-seller-image {
-    width: 20%; /* Réduit la largeur de l'image */
-    max-width: 90px; /* Taille maximale réduite */
-    aspect-ratio: 1/1;
+    width: 80px;
+    height: 80px;
     object-fit: cover;
-    border-radius: 0.3rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+    border: 1px solid #f0f0f0;
 }
 
-.best-seller-details {
+.best-seller-info {
     flex: 1;
-    font-size: 0.9em;
-    display: flex; /* Nouveau: flex pour les détails */
-    flex-wrap: wrap; /* Permet le passage à la ligne si nécessaire */
-    gap: 5%; /* Espacement entre les éléments */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
 }
 
-.detail-row {
-    flex: 1 0 30%; /* Trois colonnes par ligne */
-    min-width: 30%; /* Largeur minimale pour chaque détail */
+.best-seller-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    grid-column: span 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.best-seller-detail {
+    font-size: 12px;
     display: flex;
-    margin-bottom: 0; /* Supprime la marge basse */
+    flex-direction: column;
 }
 
-.label {
-    font-weight: bold;
-    min-width: 40%; /* Réduit la largeur du label */
-    color: #567AF4;
+.best-seller-label {
+    color: #666;
+    margin-bottom: 2px;
+    font-size: 11px;
+}
+
+.best-seller-value {
+    font-weight: 500;
+    color: #333;
+    font-size: 13px;
+}
+
+.price-value {
+    color: #E53935;
+    font-weight: 600;
 }
 
 /* Dark mode */
-.dark-theme .best-seller-compact {
+.dark-theme .best-seller-card {
     background: #2C3034;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.dark-theme .product-name,
-.dark-theme .best-seller-details {
+.dark-theme .best-seller-name,
+.dark-theme .best-seller-value {
     color: #f8f9fa;
 }
 
-.dark-theme .label {
-    color: #9ab0f7;
+.dark-theme .best-seller-label {
+    color: #aaa;
+}
+
+.dark-theme .price-value {
+    color: #FF6E6E;
+}
+
+.dark-theme .best-seller-rank {
+    background: #567AF4;
+}
+
+@media (max-width: 900px) {
+    .best-sellers-container {
+        grid-template-columns: 1fr;
+    }
+
+    .best-seller-card {
+        flex-direction: row;
+    }
+
+    .best-seller-header {
+        flex-direction: column;
+        min-width: 100px;
+    }
 }
 
 /* Media queries pour la responsivité */
 @media (max-width: 1200px) {
     .chart-container {
         min-width: 48%;
-    }
-}
-
-@media (max-width: 900px) {
-    .best-seller-compact {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .best-seller-title,
-    .best-seller-content {
-        min-width: 100%;
     }
 }
 
@@ -236,17 +291,5 @@
 
     .chart-container {
         min-width: 100%;
-    }
-
-    .best-seller-content {
-        flex-direction: row; /* Garde l'image et détails côte à côte */
-    }
-
-    .best-seller-details {
-        flex-direction: column; /* Empile les détails verticalement */
-    }
-
-    .detail-row {
-        flex: 1 0 100%; /* Pleine largeur pour chaque détail */
     }
 }

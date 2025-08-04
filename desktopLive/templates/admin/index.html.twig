@@ -38,33 +38,52 @@
             </div>
         </div>
 
-        {% if bestSeller is not null %}
-            <div class="best-seller-compact">
-                <h2 class="best-seller-title">
-                    Best Seller:
-                    <span class="product-name">{{ bestSeller.name }}</span>
-                </h2>
+        {% if bestSellers is not null %}
+            <div class="best-sellers-container">
+                {% for bestSeller in bestSellers %}
+                <div class="best-seller-card">
+                    <div class="best-seller-header">
+                        <span class="best-seller-rank">{{ loop.index }}</span>
+                        <span class="best-seller-badge">BEST SELLER</span>
+                    </div>
 
-                <div class="best-seller-content">
-                    <img
-                        src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('images/' ~ bestSeller.image_id) }}"
-                        alt="{{ bestSeller.name }}"
-                        class="best-seller-image"
-                        onerror="this.src='{{ asset('images/shoe1.jpg') }}'"
-                    >
+                    <div class="best-seller-content">
+                        <img
+                            src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('images/' ~ bestSeller.image_id) }}"
+                            alt="{{ bestSeller.name }}"
+                            class="best-seller-image"
+                            loading="lazy"
+                            width="80"
+                            height="80"
+                            onerror="this.src='{{ asset('images/shoe1.jpg') }}'"
+                        >
 
-                    <div class="best-seller-details">
-                        <div class="detail-row">
-                            <span class="label">Sales:</span> {{ bestSeller.sales }}
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Price:</span> {{ bestSeller.average_price|number_format(2, '.', ' ') }} €
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Category:</span> {{ bestSeller.category }}
+                        <div class="best-seller-info">
+                            <div class="best-seller-name" title="{{ bestSeller.name }}">{{ bestSeller.name }}</div>
+
+                            <div class="best-seller-detail">
+                                <span class="best-seller-label">Ventes</span>
+                                <span class="best-seller-value">{{ bestSeller.sales }}</span>
+                            </div>
+
+                            <div class="best-seller-detail">
+                                <span class="best-seller-label">Prix</span>
+                                <span class="best-seller-value price-value">{{ bestSeller.average_price|number_format(2, '.', ' ') }} €</span>
+                            </div>
+
+                            <div class="best-seller-detail">
+                                <span class="best-seller-label">Catégorie</span>
+                                <span class="best-seller-value">{{ bestSeller.category }}</span>
+                            </div>
+
+                            <div class="best-seller-detail">
+                                <span class="best-seller-label">Note</span>
+                                <span class="best-seller-value">4.8 ★</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         {% endif %}
     </div>
@@ -84,7 +103,7 @@
         const ventesParArticle = {{ ventesParArticle|json_encode|raw }};
         const categoryNom = "{{ category.nameCategory }}";
 
-        const meilleurVente = {{ bestSeller|json_encode|raw }};
+        const meilleurVente = {{ bestSellers|json_encode|raw }};
         console.log(meilleurVente);
 
         document.addEventListener('DOMContentLoaded', function() {

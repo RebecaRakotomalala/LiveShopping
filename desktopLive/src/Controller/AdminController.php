@@ -66,7 +66,7 @@ class AdminController extends AbstractController
             $dateD,
             $dateF,
             $defaultSeller->getId(),
-            1
+            3
         );
 
         return $this->render('admin/index.html.twig', [
@@ -78,7 +78,7 @@ class AdminController extends AbstractController
             'start' => $dateD->format('Y-m-d'),
             'end' => $dateF->format('Y-m-d'),
             'defaultSeller' => $defaultSeller,
-            'bestSeller' => $bestSeller[0] ?? null
+            'bestSellers' => $bestSeller ?? null
         ]);
     }
 
@@ -117,7 +117,7 @@ class AdminController extends AbstractController
         $stats = $saleRepository->getStatistiquesVendeur($dateD, $dateF, $defaultSeller->getId());
         $ventesParCategorieParMois = $saleRepository->getVentesVendeurParCategorieParMois($dateD, $dateF, $defaultSeller->getId());
         $ventesParArticle = $saleRepository->getVentesParArticlePourCategorie($dateD, $dateF, $defaultSeller->getId(), $categoryId);
-        $bestSeller = $saleRepository->getTopArticlesVendeur($dateD, $dateF, $defaultSeller->getId(), 1);
+        $bestSeller = $saleRepository->getTopArticlesVendeur($dateD, $dateF, $defaultSeller->getId(), 3);
 
         // Optionnel : transformer objets Doctrine si besoin
 
@@ -135,7 +135,7 @@ class AdminController extends AbstractController
                 'id' => $defaultSeller->getId(),
                 'username' => $defaultSeller->getUsername(),
             ],
-            'bestSeller' => $bestSeller[0] ?? null
+            'bestSellers' => $bestSeller ?? null
         ]);
     }
 

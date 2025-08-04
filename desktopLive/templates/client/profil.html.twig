@@ -6,7 +6,7 @@
     <title>Profil Client</title>
 </head>
 <header>
-    {% include 'components/navbar.html.twig' %}
+    {% include 'components/navbarClient.html.twig' %}
 </header>
 <body>
     <div class="profile-container">
@@ -34,19 +34,19 @@
             <div class="profile-info">
                 <div id="profile-view" class="info-container">
                     <div class="info-item">
-                        <span class="info-label">Email</span>
+                        <span class="info-label" data-i18n="mail">Email</span>
                         <span class="info-value">{{ user.email }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Adresse</span>
+                        <span class="info-label" data-i18n="address">Adresse</span>
                         <span class="info-value">{{ user.address }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Country</span>
+                        <span class="info-label" data-i18n="country">Country</span>
                         <span class="info-value">{{ user.country }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label">Contact</span>
+                        <span class="info-label" data-i18n="contact">Contact</span>
                         <span class="info-value">{{ user.contact }}</span>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                 <div id="profile-edit" class="edit-form">
                     <form method="POST" action="{{ path('app_client_update_profile') }}" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label>Photo de profil</label>
+                            <label data-i18n="profil_picture">Photo de profil</label>
                             <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
                             <div style="display: flex; align-items: center; gap: 15px;">
                                 <div id="image-preview-container" style="width: 80px; height: 80px; border-radius: 50%; background: #f0f0f0; overflow: hidden;">
@@ -67,7 +67,7 @@
                                         </div>
                                     {% endif %}
                                 </div>
-                                <button type="button" onclick="document.getElementById('image-upload').click()" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                <button type="button" data-i18n="choose_image" onclick="document.getElementById('image-upload').click()" style="padding: 8px 12px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                     Choisir une image
                                 </button>
                             </div>
@@ -75,38 +75,49 @@
                         </div>
                         
                         <div class="form-group">
-                            <label>Nom d'utilisateur</label>
+                            <label data-i18n="username">Nom d'utilisateur</label>
                             <input type="text" name="username" value="{{ user.username }}">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
+                            <label data-i18n="mail">Email</label>
                             <input type="email" name="email" value="{{ user.email }}">
                         </div>
                         <div class="form-group">
-                            <label>Adresse</label>
+                            <label data-i18n="address">Adresse</label>
                             <input type="text" name="address" value="{{ user.address }}">
                         </div>
                         <div class="form-group">
-                            <label>Country</label>
-                            <input type="text" name="country" value="{{ user.country }}">
+                            <label data-i18n="country">Country</label>
+                            <select id="country" name="country" class="select2" required>
+                                {% for country in countries %}
+                                    <option value="{{ country }}" {% if country == user.country %}selected{% endif %}>{{ country }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label>Contact</label>
+                            <label data-i18n="contact">Contact</label>
                             <input type="text" name="contact" value="{{ user.contact }}">
                         </div>
                         
                         <div class="form-actions">
-                            <button type="button" id="cancel-edit" class="btn btn-cancel">Annuler</button>
-                            <button type="submit" class="btn btn-save">Enregistrer</button>
+                            <button type="button" id="cancel-edit" class="btn btn-cancel" data-i18n="cancel">Annuler</button>
+                            <button type="submit" class="btn btn-save" data-i18n="save">Enregistrer</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
+    {# Inclusion des dépendances Select2 #}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            $('.select2').select2({
+                placeholder: 'Select a country',
+                allowClear: true
+            });
             const editBtn = document.getElementById('edit-btn');
             const cancelEdit = document.getElementById('cancel-edit');
             const profileView = document.getElementById('profile-view');

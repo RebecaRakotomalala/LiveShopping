@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use App\Service\CountryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ProfilClientController extends AbstractController
 {
     #[Route('/client/profil', name: 'app_client_profil')]
-    public function profil(Request $request, EntityManagerInterface $em): Response
+    public function profil(Request $request, EntityManagerInterface $em, CountryService $countryService): Response
     {
         $session = $request->getSession();
         $userSession = $session->get('user');
@@ -34,9 +35,12 @@ final class ProfilClientController extends AbstractController
             $imagePath = '/uploads/' . $user->getImages();
         }
 
+        $countries = $countryService->getCountries();
+
         return $this->render('client/profil.html.twig', [
             'user' => $user,
             'imagePath' => $imagePath,
+            'countries' => $countries,
         ]);
     }
 
@@ -73,7 +77,6 @@ final class ProfilClientController extends AbstractController
             return $this->redirectToRoute('app_client_profil');
         }
 
-        // Gestion de l'image
         /** @var UploadedFile|null $imageFile */
         $imageFile = $request->files->get('image');
         if ($imageFile) {

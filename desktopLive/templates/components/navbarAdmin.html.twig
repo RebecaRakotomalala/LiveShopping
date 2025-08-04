@@ -1,9 +1,8 @@
-<!-- NAVBAR -->
 <nav class="navbar">
     <div class="nav-links" id="navLinks">
         <a href="#" data-i18n="home">Home</a>
-        <a href="#" data-i18n="favorites">Favoris List</a>
-        <a href="#" data-i18n="cart">Cart</a>
+        <a href="#" data-i18n="sales_history">Sales History</a>
+        <a href="#" data-i18n="items">Items</a>
     </div>
 
     <span class="logo">
@@ -12,13 +11,12 @@
     </span>
 
     <div class="right-group">
-        <input class="search-bar" type="text" placeholder="Recherche..." data-i18n-placeholder="search">
         <div class="icons">
             <span class="icon">
-                <!-- Loupe -->
-                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2">
-                    <circle cx="17" cy="17" r="10" />
-                    <line x1="25" y1="25" x2="36" y2="36" />
+                <!-- Start Live Icon -->
+                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
+                    <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
                 </svg>
             </span>
             <span class="icon">
@@ -361,23 +359,41 @@
         const translations = {
             fr: {
                 home: 'Accueil',
-                favorites: 'Liste de favoris',
-                cart: 'Panier',
+                sales_history: 'Historique des ventes',
+                items: 'Articles',
                 profile: 'Votre profil',
                 theme: 'Changer thème',
                 language: 'Langue',
                 logout: 'Déconnexion',
-                search: 'Recherche...'
+                search: 'Recherche...',
+                mail: 'E-mail',
+                address: 'Adresse',
+                country: 'Pays',
+                contact: 'Contact',
+                choose_image: 'Choisir une image',
+                username: 'Nom d\'utilisateur',
+                cancel: 'Annuler',
+                save: 'Enregistrer',
+                profil_picture: 'Photo de profil',
             },
             en: {
                 home: 'Home',
-                favorites: 'Favorites List',
-                cart: 'Cart',
+                sales_history: 'Sales History',
+                items: 'Items',
                 profile: 'Your profile',
                 theme: 'Theme change',
                 language: 'Language',
                 logout: 'Log out',
-                search: 'Search...'
+                search: 'Search...',
+                mail: 'Email',
+                address: 'Address',
+                country: 'Country',
+                contact: 'Contact',
+                choose_image: 'Choose image',
+                username: 'Username',
+                cancel: 'Cancel',
+                save: 'Save',
+                profil_picture: 'Profile picture',
             }
         };
 
@@ -407,4 +423,3 @@
         });
     });
 </script>
-

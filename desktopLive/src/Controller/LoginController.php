@@ -60,4 +60,46 @@ final class LoginController extends AbstractController
             'log_message' => $logMessage,
         ]);
     }
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
+    public function apiLogin(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $hasher
+    ): Response {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data) {
+            return $this->json(['error' => 'JSON invalide'], 400);
+        }
+
+        if (empty($data['username']) || empty($data['password'])) {
+            return $this->json(['error' => 'Nom d’utilisateur ou mot de passe manquant'], 400);
+        }
+
+        /** @var Users|null $user */
+        $user = $em->getRepository(Users::class)->findOneBy(['username' => $data['username']]);
+
+        if (!$user) {
+            return $this->json(['error' => 'Nom d’utilisateur invalide.'], 401);
+        }
+
+        if (!$hasher->isPasswordValid($user, $data['password'])) {
+            return $this->json(['error' => 'Mot de passe incorrect.'], 401);
+        }
+
+        // Authentification réussie
+        return $this->json([
+            'message' => 'Connexion réussie',
+            'user' => [
+                'id_user' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'contact' => $user->getContact(),
+                'address' => $user->getAddress(),
+                'country' => $user->getCountry(),
+                'image' => $user->getImages(),
+                'is_seller' => $user->isSeller(),
+            ]
+        ]);
+    }
 }

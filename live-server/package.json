@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "node-media-server": "^4.0.20"
+    "node-media-server": "^4.0.20",
+    "ws": "^8.18.3"
   }
 }

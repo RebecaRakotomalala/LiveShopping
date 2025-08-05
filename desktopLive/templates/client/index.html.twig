@@ -1,13 +1,83 @@
-{# filepath: templates/client/index.html.twig #}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>LiveShop</title>
-    <link href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('assets/css/navbar.css') }}">
-</head>
-<body>
-    {% include 'components/navbarClient.html.twig' %}
-</body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}Live en direct{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">🎥 Regarder le Live</h1>
+
+        <div class="video-container text-center">
+            <video id="viewerVideo" autoplay playsinline controls width="100%" class="mb-4"></video>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        const viewerId = '{{ userId }}'; // <- ID du user connecté injecté depuis PHP
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const signalingServer = new WebSocket('ws://localhost:8080');
+            let peerConnection;
+
+            signalingServer.onopen = () => {
+                console.log('Connexion au signaling server établie');
+                signalingServer.send(JSON.stringify({
+                    type: 'viewer',
+                    viewerId: viewerId  // <- identifiant utilisateur envoyé
+                }));
+            };
+
+            signalingServer.onerror = (error) => {
+                console.error('Erreur WebSocket:', error);
+            };
+
+            signalingServer.onclose = () => {
+                console.log('Connexion WebSocket fermée');
+            };
+
+            signalingServer.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Message reçu du signaling server:', data);
+
+                if (data.type === 'offer') {
+                    peerConnection = new RTCPeerConnection();
+
+                    peerConnection.ontrack = event => {
+                        const video = document.getElementById('viewerVideo');
+                        if (event.streams && event.streams[0]) {
+                            video.srcObject = event.streams[0];
+                        }
+                    };
+
+                    peerConnection.onicecandidate = e => {
+                        if (e.candidate) {
+                            signalingServer.send(JSON.stringify({
+                                type: 'candidate',
+                                candidate: e.candidate,
+                                target: 'streamer',
+                                viewerId: viewerId  // <- inclure l’ID ici aussi
+                            }));
+                        }
+                    };
+
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+
+                    signalingServer.send(JSON.stringify({
+                        type: 'answer',
+                        answer: answer,
+                        viewerId: viewerId  // <- idem ici
+                    }));
+                }
+                else if (data.type === 'candidate') {
+                    if (peerConnection) {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    }
+                }
+            };
+        });
+    </script>
+{% endblock %}

@@ -23,27 +23,72 @@
     </div>
 {% endblock %}
 
-{% block javascripts %}
+    {% block javascripts %}
     {{ parent() }}
 
     {% if live %}
-        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const webcam = document.getElementById("webcamPreview");
+        document.addEventListener("DOMContentLoaded", function () {
+            const signalingServer = new WebSocket('ws://localhost:8080');
+            const peerConnections = new Map();
+            let localStream;
 
-                // Demande l'accès à la caméra et au micro
-                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                    .then(function (stream) {
-                        webcam.srcObject = stream;
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    localStream = stream;
+                    const webcam = document.getElementById("webcamPreview");
+                    webcam.srcObject = stream;
 
-                        // 💡 Ici tu pourrais envoyer `stream` à ton serveur WebSocket ou Media Server si tu veux diffuser en live
-                    })
-                    .catch(function (err) {
-                        console.error("Erreur d’accès à la caméra :", err);
-                        alert("Impossible d’accéder à la caméra : " + err.message);
-                    });
-            });
+                    signalingServer.onopen = () => {
+                        signalingServer.send(JSON.stringify({ type: 'streamer' }));
+                    };
+
+                    signalingServer.onmessage = async (event) => {
+                        const data = JSON.parse(event.data);
+
+                        if (data.type === 'newViewer') {
+                            // Crée une nouvelle PeerConnection pour ce viewer
+                            const pc = new RTCPeerConnection();
+
+                            // Ajoute les tracks locales (cam + micro)
+                            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+                            pc.onicecandidate = e => {
+                                if (e.candidate) {
+                                    signalingServer.send(JSON.stringify({
+                                        type: 'candidate',
+                                        candidate: e.candidate,
+                                        target: 'viewer',
+                                        viewerId: data.viewerId  // pour que le viewer sache à qui s'adresse ce message
+                                    }));
+                                }
+                            };
+
+                            // Crée une offre SDP
+                            const offer = await pc.createOffer();
+                            await pc.setLocalDescription(offer);
+
+                            signalingServer.send(JSON.stringify({
+                                type: 'offer',
+                                offer: offer
+                            }));
+
+                            // Stocke la connexion, ici simplifié avec une clé statique
+                            peerConnections.set(data.viewerId, pc);
+                        } else if (data.type === 'answer') {
+                            const pc = peerConnections.get('viewerId');
+                            if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                        } else if (data.type === 'candidate') {
+                            const pc = peerConnections.get('viewerId');
+                            if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        }
+                    };
+                })
+                .catch(err => {
+                    console.error('Erreur accès caméra:', err);
+                    alert("Impossible d’accéder à la caméra : " + err.message);
+                });
+        });
         </script>
     {% endif %}
 {% endblock %}

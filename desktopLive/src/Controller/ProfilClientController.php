@@ -128,12 +128,6 @@ final class ProfilClientController extends AbstractController
     #[Route('/api/client/profil/update', name: 'api_client_update_profile', methods: ['POST'])]
     public function apiUpdateProfil(Request $request, EntityManagerInterface $em): Response
     {
-        $session = $request->getSession();
-        $userSession = $session->get('user');
-
-        if (!$userSession) {
-            return $this->json(['error' => 'Non authentifié'], 401);
-        }
 
         $data = json_decode($request->getContent(), true);
         if (!$data) {
@@ -141,7 +135,7 @@ final class ProfilClientController extends AbstractController
         }
 
         /** @var Users $user */
-        $user = $em->getRepository(Users::class)->find($userSession['id']);
+        $user = $em->getRepository(Users::class)->find($data['id_user']);
 
         if (!$user) {
             return $this->json(['error' => 'Utilisateur non trouvé'], 404);
@@ -153,24 +147,24 @@ final class ProfilClientController extends AbstractController
 
         $user->setUsername($data['username']);
         $user->setEmail($data['email']);
+        $user->setImages($data['images']);
         $user->setAddress($data['address'] ?? null);
         $user->setCountry($data['country'] ?? null);
         $user->setContact($data['contact'] ?? null);
 
         $em->flush();
 
-        $userSession['username'] = $data['username'];
-        $session->set('user', $userSession);
-
         return $this->json([
             'message' => 'Profil mis à jour avec succès',
             'user' => [
+                'id_user' => $user->getId(),
                 'username' => $user->getUsername(),
                 'email' => $user->getEmail(),
-                'adress' => $user->getAddress(),
+                'address' => $user->getAddress(),
                 'country' => $user->getCountry(),
                 'contact' => $user->getContact(),
-                'image' => $user->getImages(),
+                'images' => $user->getImages(),
+                'is_seller' => $user->isSeller(),
             ]
         ]);
     }
@@ -184,7 +178,7 @@ final class ProfilClientController extends AbstractController
             $imageName = uniqid() . '.' . $imageFile->guessExtension();
             $imageFile->move($this->getParameter('uploads_directory'), $imageName);
 
-            return new JsonResponse(['status' => 'success', 'filename' => $filename]);
+            return new JsonResponse(['status' => 'success', 'filename' => $imageName]);
         }
         return new JsonResponse(['status' => 'error'], 400);
     }

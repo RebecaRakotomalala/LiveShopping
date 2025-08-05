@@ -35,6 +35,14 @@ final class ProfilController extends AbstractController
 
         $countries = $countryService->getCountries();
 
+        if ($user->isSeller()) {
+            return $this->render('admin/profil.html.twig', [
+                'user' => $user,
+                'imagePath' => $imagePath,
+                'countries' => $countries,
+            ]);
+        }
+
         return $this->render('client/profil.html.twig', [
             'user' => $user,
             'imagePath' => $imagePath,

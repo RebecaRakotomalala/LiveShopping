@@ -1,6 +1,6 @@
 <nav class="navbar">
     <div class="nav-links" id="navLinks">
-        <a href="#" data-i18n="home">Home</a>
+        <a href="{{ path('app_dashboard') }}" data-i18n="home">Home</a>
         <a href="#" data-i18n="sales_history">Sales History</a>
         <a href="#" data-i18n="items">Items</a>
     </div>
@@ -12,13 +12,15 @@
 
     <div class="right-group">
         <div class="icons">
-            <span class="icon">
-                <!-- Start Live Icon -->
-                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
-                    <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
-                </svg>
-            </span>
+            <a href="{{ path('app_live') }}" class="icon" title="Démarrer le live">
+                <span class="icon">
+                    <!-- Start Live Icon -->
+                    <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
+                        <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
+                    </svg>
+                </span>
+            </a>
             <span class="icon">
                 <!-- Bulle -->
                 <svg width="38" height="38" viewBox="0 0 38 38" fill="none" stroke="#567AF4" stroke-width="2">

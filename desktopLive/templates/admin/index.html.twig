@@ -1,4 +1,3 @@
-
 {% extends 'admin/baseAdmin.html.twig' %}
 {% block stylesheets %}
     {{ parent() }}
@@ -6,242 +5,266 @@
 {% endblock %}
 
 {% block content %}
-    <div class="dashboard-container">
-        <form class="date-form" action="" method="post">
-            <div class="form-group">
-                <input type="date" name="dateD" id="dateD" required>
-            </div>
-            <div class="form-group">
-                <input type="date" name="dateF" id="dateF" required>
-            </div>
-            <div class="form-group">
-                <select name="category" id="category" required>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.nameCategory }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="submit" class="submit-btn">Search</button>
-        </form>
+    <div class="modern-dashboard">
+        <!-- Filtres modernes -->
+        <div class="filter-card">
+            <form action="{{ path('app_dashboard') }}" method="post">
+                <div class="filter-group">
+                    <label for="dateD">Période</label>
+                    <div class="date-range">
+                        <input type="date" name="dateD" id="dateD" required class="modern-input">
+                        <span class="date-separator">—</span>
+                        <input type="date" name="dateF" id="dateF" required class="modern-input">
+                    </div>
+                </div>
 
-        <div class="charts-row">
-            <div class="chart-container">
+                <div class="filter-group">
+                    <label for="category">Catégorie</label>
+                    <select name="category" id="category" required class="modern-select">
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.nameCategory }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="modern-button">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Appliquer
+                </button>
+            </form>
+        </div>
+
+        <!-- Graphiques avec style moderne -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Chiffre d'affaires</h3>
+                    <span class="chart-badge">Mensuel</span>
+                </div>
                 <canvas id="salesChart"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Tendances</h3>
+                    <span class="chart-badge">Par catégorie</span>
+                </div>
                 <canvas id="trendsChart"></canvas>
             </div>
 
-            <div class="chart-container">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Répartition</h3>
+                    <span class="chart-badge">Ventes</span>
+                </div>
                 <canvas id="cheeseChart"></canvas>
             </div>
         </div>
 
+        <!-- Best Sellers modernisé -->
         {% if bestSellers is not null %}
-            <div class="best-sellers-container">
+        <div class="bestsellers-section">
+            <div class="section-header">
+                <h2>Produits phares</h2>
+                <p>Les meilleures ventes sur la période sélectionnée</p>
+            </div>
+
+            <div class="products-grid">
                 {% for bestSeller in bestSellers %}
-                <div class="best-seller-card">
-                    <div class="best-seller-header">
-                        <span class="best-seller-rank">{{ loop.index }}</span>
-                        <span class="best-seller-badge">BEST SELLER</span>
+                <div class="product-card">
+                    <div class="product-rank">{{ loop.index }}</div>
+
+                    <div class="product-image-container">
+                        <img src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('uploads/' ~ bestSeller.image_id) }}"
+                             alt="{{ bestSeller.name }}"
+                             class="product-image"
+                             onerror="this.src='{{ asset('uploads/shoe1.jpg') }}'">
                     </div>
 
-                    <div class="best-seller-content">
-                        <img
-                            src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('uploads/' ~ bestSeller.image_id) }}"
-                            alt="{{ bestSeller.name }}"
-                            class="best-seller-image"
-                            loading="lazy"
-                            width="80"
-                            height="80"
-                            onerror="this.src='{{ asset('uploads/shoe1.jpg') }}'"
-                        >
+                    <div class="product-details">
+                        <h4>{{ bestSeller.name }}</h4>
+                        <span class="product-category">{{ bestSeller.category }}</span>
 
-                        <div class="best-seller-info">
-                            <div class="best-seller-name" title="{{ bestSeller.name }}">{{ bestSeller.name }}</div>
-
-                            <div class="best-seller-detail">
-                                <span class="best-seller-label">Ventes</span>
-                                <span class="best-seller-value">{{ bestSeller.sales }}</span>
+                        <div class="product-stats">
+                            <div class="stat-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 19V5L22 12L9 19Z" fill="currentColor"/>
+                                </svg>
+                                <span>{{ bestSeller.sales }} ventes</span>
                             </div>
-
-                            <div class="best-seller-detail">
-                                <span class="best-seller-label">Prix</span>
-                                <span class="best-seller-value price-value">{{ bestSeller.average_price|number_format(2, '.', ' ') }} €</span>
-                            </div>
-
-                            <div class="best-seller-detail">
-                                <span class="best-seller-label">Catégorie</span>
-                                <span class="best-seller-value">{{ bestSeller.category }}</span>
-                            </div>
-
-                            <div class="best-seller-detail">
-                                <span class="best-seller-label">Note</span>
-                                <span class="best-seller-value">4.8 ★</span>
+                            <div class="stat-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>{{ bestSeller.average_price|number_format(2, ',', ' ') }} €</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+        </div>
         {% endif %}
     </div>
-
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        const statsMensuelles = {{ stats|json_encode|raw }};
-        const vendeurNom = "{{ defaultSeller.username ?? 'Vendeur inconnu' }}";
-        console.log(vendeurNom);
-
-        const ventesParCategorieParMois = {{ ventesParCategorieParMois|json_encode|raw }};
-
-        const ventesParArticle = {{ ventesParArticle|json_encode|raw }};
-        const categoryNom = "{{ category.nameCategory }}";
-
-        const meilleurVente = {{ bestSellers|json_encode|raw }};
-        console.log(meilleurVente);
-
         document.addEventListener('DOMContentLoaded', function() {
-            // Fonction pour les options dynamiques
-            const getChartOptions = (title, isDoughnut = false) => {
-                const isDark = document.body.classList.contains('dark-theme');
-                const options = {
-                    responsive: true,
-                    scales: {},
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: title,
-                            color: isDark ? '#F8F9FA' : '#212529',
-                            font: { size: 16 }
-                        },
-                        legend: {
-                            labels: {
-                                color: isDark ? '#F8F9FA' : '#212529'
-                            }
-                        }
-                    }
-                };
-
-                if (!isDoughnut) {
-                    options.scales = {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)' },
-                            ticks: { color: isDark ? '#F8F9FA' : '#212529' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: isDark ? '#F8F9FA' : '#212529' }
-                        }
-                    };
-                }
-
-                return options;
+            // Couleurs modernes
+            const colors = {
+                primary: '#4361ee',
+                secondary: '#3a0ca3',
+                accent: '#f72585',
+                gray: '#4a5568',
+                lightGray: '#e2e8f0'
             };
 
-            // Graphique principal avec évolution mensuelle du CA
-            const salesChart = new Chart(document.getElementById('salesChart'), {
+            // Données des graphiques
+            const statsMensuelles = {{ stats|json_encode|raw }};
+            const ventesParCategorieParMois = {{ ventesParCategorieParMois|json_encode|raw }};
+            const ventesParArticle = {{ ventesParArticle|json_encode|raw }};
+
+            // Graphique CA mensuel
+            new Chart(document.getElementById('salesChart'), {
                 type: 'bar',
                 data: {
                     labels: statsMensuelles.labels.length > 0 ? statsMensuelles.labels : ['Aucune donnée'],
                     datasets: [{
-                        label: 'Chiffre d\'affaires mensuel (€)',
+                        label: 'CA (€)',
                         data: statsMensuelles.chiffre_affaires.length > 0 ? statsMensuelles.chiffre_affaires : [0],
-                        backgroundColor: '#567AF4',
-                        borderColor: '#3A5BCD',
-                        borderWidth: 1
+                        backgroundColor: colors.primary,
+                        borderColor: colors.secondary,
+                        borderWidth: 0,
+                        borderRadius: 6
                     }]
                 },
-                options: {
-                    ...getChartOptions('Évolution Mensuelle - ' + vendeurNom),
-
-                    plugins: {
-                        ...getChartOptions('Évolution Mensuelle - ' + vendeurNom).plugins,
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'CA: ' + context.raw.toLocaleString() + '€';
-                                }
-                            }
-                        }
-                    }
-                }
+                options: getChartOptions('Chiffre d\'affaires mensuel')
             });
 
-            const colors = [
-                '#567AF4', '#4BC0C0', '#FF9966', '#9966FF', '#FF6384', '#36A2EB'
+            // Graphique tendances
+            const categoryColors = [
+                colors.primary,
+                colors.accent,
+                '#7209b7',
+                '#3a86ff',
+                colors.gray
             ];
 
-            const trendsChart = new Chart(document.getElementById('trendsChart'), {
+            new Chart(document.getElementById('trendsChart'), {
                 type: 'line',
                 data: {
                     labels: ventesParCategorieParMois.labels.length > 0 ? ventesParCategorieParMois.labels : ['Aucune donnée'],
                     datasets: Object.entries(ventesParCategorieParMois.datasets || {}).map(([cat, data], index) => ({
                         label: cat,
                         data: data,
-                        borderColor: colors[index % colors.length],
-                        backgroundColor: colors[index % colors.length] + '33',
+                        borderColor: categoryColors[index % categoryColors.length],
+                        backgroundColor: 'transparent',
                         borderWidth: 2,
-                        tension: 0.3
+                        tension: 0.3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
                     }))
                 },
-                options: getChartOptions('Évolution des Ventes par Catégorie - ' + vendeurNom)
+                options: getChartOptions('Ventes par catégorie')
             });
 
-            const cheeseCtx = document.getElementById('cheeseChart').getContext('2d');
-            // Préparer les données
-            const cheeseLabels = ventesParArticle && ventesParArticle.datasets
-                ? Object.keys(ventesParArticle.datasets)
-                : [];
+            // Graphique répartition
+            const cheeseData = ventesParArticle && ventesParArticle.datasets
+                ? Object.entries(ventesParArticle.datasets).map(([label, data]) => ({
+                    label: label,
+                    data: Array.isArray(data) ? data.reduce((a, b) => a + b, 0) : 0
+                }))
+                : [{ label: 'Aucune donnée', data: 1 }];
 
-            const cheeseData = cheeseLabels.map(label => {
-                const dataArray = ventesParArticle.datasets[label];
-                console.log('→', label, dataArray);
-                return Array.isArray(dataArray)
-                    ? dataArray.reduce((a, b) => a + b, 0)
-                    : 0;
-            });
-
-            // Couleurs dynamiques (ajustables si plus de 6 articles)
-            const cheeseColors = [
-                '#567AF4', '#4BC0C0', '#FF9966', '#9966FF', '#FF6384', '#36A2EB',
-                '#FFC107', '#00BCD4', '#8BC34A', '#FF5722'
-            ];
-
-            const cheeseChart = new Chart(cheeseCtx, {
+            new Chart(document.getElementById('cheeseChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: cheeseLabels.length ? cheeseLabels : ['Aucune donnée'],
+                    labels: cheeseData.map(item => item.label),
                     datasets: [{
-                        data: cheeseData.length ? cheeseData : [1],
-                        backgroundColor: cheeseColors.slice(0, cheeseLabels.length),
-                        borderColor: document.body.classList.contains('dark-theme') ? '#2C3034' : '#FFFFFF',
-                        borderWidth: 2
+                        data: cheeseData.map(item => item.data),
+                        backgroundColor: [
+                            colors.primary,
+                            colors.accent,
+                            '#7209b7',
+                            '#3a86ff',
+                            colors.gray
+                        ],
+                        borderWidth: 0
                     }]
                 },
-                options: getChartOptions('Répartition des articles - ' + categoryNom, true)
+                options: {
+                    ...getChartOptions('Répartition des ventes'),
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
             });
 
-            // Rafraîchissement lors du changement de thème
-            const updateCharts = () => {
-                salesChart.options = getChartOptions('Statistiques des Ventes Mensuelles');
-                trendsChart.options = getChartOptions('Évolution des Ventes par Catégorie');
-                cheeseChart.options = getChartOptions('Détail par Article', true);
-
-                salesChart.update();
-                trendsChart.update();
-                cheeseChart.update();
-            };
-
-            document.getElementById('themeToggle').addEventListener('click', function() {
-                setTimeout(updateCharts, 100);
-            });
+            // Options communes des graphiques
+            function getChartOptions(title) {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#2d3748',
+                            titleColor: '#fff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: '#4a5568',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            usePointStyle: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: colors.lightGray,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: colors.gray
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: colors.gray
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            fill: false
+                        }
+                    }
+                };
+            }
         });
     </script>
 {% endblock %}

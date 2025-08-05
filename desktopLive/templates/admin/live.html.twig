@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Live - Admin{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="mb-4">🎬 Diffusion en direct</h1>
+
+        {% if live %}
+            <p><strong>Début du live :</strong> {{ live.startLive|date('Y-m-d H:i') }}</p>
+
+            <video id="webcamPreview" autoplay muted width="100%" class="mb-3"></video>
+
+            <a href="{{ path('admin_live_stop', {'id': live.id}) }}" class="btn btn-danger">
+                ⛔ Terminer le Live
+            </a>
+        {% else %}
+            <p>Aucun live n’est en cours pour le moment.</p>
+            <a href="{{ path('admin_live_start') }}" class="btn btn-success">
+                🎥 Démarrer un Live
+            </a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {% if live %}
+        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const webcam = document.getElementById("webcamPreview");
+
+                // Demande l'accès à la caméra et au micro
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(function (stream) {
+                        webcam.srcObject = stream;
+
+                        // 💡 Ici tu pourrais envoyer `stream` à ton serveur WebSocket ou Media Server si tu veux diffuser en live
+                    })
+                    .catch(function (err) {
+                        console.error("Erreur d’accès à la caméra :", err);
+                        alert("Impossible d’accéder à la caméra : " + err.message);
+                    });
+            });
+        </script>
+    {% endif %}
+{% endblock %}

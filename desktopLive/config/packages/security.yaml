@@ -30,7 +30,7 @@ security:
                 lifetime: 604800 # 1 semaine
                 path: /
                 name: REMEMBERME
-                
+
             entry_point: App\Security\LoginAuthenticator
 
             logout:

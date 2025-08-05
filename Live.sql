@@ -180,6 +180,9 @@ CREATE TABLE Commande(
    FOREIGN KEY(id_state) REFERENCES State_commande(id_state),
    FOREIGN KEY(id_bag) REFERENCES Bag(id_bag)
 );
+ALTER TABLE sale
+ALTER COLUMN sale_date TYPE TIMESTAMP
+USING sale_date::timestamp;
 
 CREATE TABLE Liaison_notification(
    id_liaison SERIAL,

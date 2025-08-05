@@ -49,13 +49,13 @@
 
                     <div class="best-seller-content">
                         <img
-                            src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('images/' ~ bestSeller.image_id) }}"
+                            src="{{ bestSeller.image_id starts with 'http' ? bestSeller.image_id : asset('uploads/' ~ bestSeller.image_id) }}"
                             alt="{{ bestSeller.name }}"
                             class="best-seller-image"
                             loading="lazy"
                             width="80"
                             height="80"
-                            onerror="this.src='{{ asset('images/shoe1.jpg') }}'"
+                            onerror="this.src='{{ asset('uploads/shoe1.jpg') }}'"
                         >
 
                         <div class="best-seller-info">

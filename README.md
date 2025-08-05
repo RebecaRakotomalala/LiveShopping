@@ -13,7 +13,7 @@ composer require symfony/http-
 composer require symfony/asset
 php bin/console make:
 npm install chart.js
-
+composer require symfony/mime
 
 
 

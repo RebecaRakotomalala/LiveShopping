@@ -45,7 +45,11 @@
             debugLog('🚀 Démarrage du streamer');
 
             // Initialiser WebSocket EN PREMIER
+<<<<<<< Updated upstream
             const signalingServer = new WebSocket('wss://192.168.88.26:8080');
+=======
+            const signalingServer = new WebSocket('ws://localhost:9090');
+>>>>>>> Stashed changes
             const peerConnections = new Map();
             let localStream;
 

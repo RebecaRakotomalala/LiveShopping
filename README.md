@@ -17,3 +17,5 @@ composer require symfony/mime
 
 
 npm install ws
+
+symfony serve --allow-http --port=8000 --allow-all-ip

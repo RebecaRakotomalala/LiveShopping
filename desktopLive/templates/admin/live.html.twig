@@ -45,7 +45,7 @@
             debugLog('🚀 Démarrage du streamer');
 
             // Initialiser WebSocket EN PREMIER
-            const signalingServer = new WebSocket('ws://192.168.88.26:9090');
+            const signalingServer = new WebSocket('wss://192.168.88.26:9090');
             const peerConnections = new Map();
             let localStream;
 

@@ -137,10 +137,9 @@ wss.on('connection', ws => {
     });
 });
 
-const PORT = 9090;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Serveur HTTPS + WSS démarré sur le port ${PORT} (écoute sur 0.0.0.0)`);
-});
+server.listen(9090, '0.0.0.0', () => {
+    console.log('🚀 Serveur HTTPS + WSS démarré sur le port 9090');
+});;
 
 // Ménage régulier
 setInterval(() => {

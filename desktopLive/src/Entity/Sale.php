@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\SaleRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SaleRepository::class)]
@@ -13,7 +14,7 @@ class Sale
     #[ORM\Column(name: "id_sale")]
     private ?int $id = null;
 
-    #[ORM\Column(name: "sale_date")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)] 
     private ?\DateTimeInterface $saleDate = null;
 
     #[ORM\Column(name: "is_paid")]

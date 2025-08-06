@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Live - Admin{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="mb-4">🎬 Diffusion en direct</h1>
+
+        {% if live %}
+            <p><strong>Début du live :</strong> {{ live.startLive|date('Y-m-d H:i') }}</p>
+
+            <video id="webcamPreview" autoplay muted width="100%" class="mb-3"></video>
+
+            <a href="{{ path('admin_live_stop', {'id': live.id}) }}" class="btn btn-danger">
+                ⛔ Terminer le Live
+            </a>
+        {% else %}
+            <p>Aucun live n’est en cours pour le moment.</p>
+            <a href="{{ path('admin_live_start') }}" class="btn btn-success">
+                🎥 Démarrer un Live
+            </a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+    {% block javascripts %}
+    {{ parent() }}
+
+    {% if live %}
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const signalingServer = new WebSocket('ws://localhost:8080');
+            const peerConnections = new Map();
+            let localStream;
+
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(stream => {
+                    localStream = stream;
+                    const webcam = document.getElementById("webcamPreview");
+                    webcam.srcObject = stream;
+
+                    signalingServer.onopen = () => {
+                        signalingServer.send(JSON.stringify({ type: 'streamer' }));
+                    };
+
+                    signalingServer.onmessage = async (event) => {
+                        const data = JSON.parse(event.data);
+
+                        if (data.type === 'newViewer') {
+                            // Crée une nouvelle PeerConnection pour ce viewer
+                            const pc = new RTCPeerConnection();
+
+                            // Ajoute les tracks locales (cam + micro)
+                            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+                            pc.onicecandidate = e => {
+                                if (e.candidate) {
+                                    signalingServer.send(JSON.stringify({
+                                        type: 'candidate',
+                                        candidate: e.candidate,
+                                        target: 'viewer',
+                                        viewerId: data.viewerId  // pour que le viewer sache à qui s'adresse ce message
+                                    }));
+                                }
+                            };
+
+                            // Crée une offre SDP
+                            const offer = await pc.createOffer();
+                            await pc.setLocalDescription(offer);
+
+                            signalingServer.send(JSON.stringify({
+                                type: 'offer',
+                                offer: offer
+                            }));
+
+                            // Stocke la connexion, ici simplifié avec une clé statique
+                            peerConnections.set(data.viewerId, pc);
+                        } else if (data.type === 'answer') {
+                            const pc = peerConnections.get('viewerId');
+                            if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                        } else if (data.type === 'candidate') {
+                            const pc = peerConnections.get('viewerId');
+                            if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        }
+                    };
+                })
+                .catch(err => {
+                    console.error('Erreur accès caméra:', err);
+                    alert("Impossible d’accéder à la caméra : " + err.message);
+                });
+        });
+        </script>
+    {% endif %}
+{% endblock %}

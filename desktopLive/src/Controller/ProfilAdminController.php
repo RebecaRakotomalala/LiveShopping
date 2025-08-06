@@ -11,9 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class ProfilClientController extends AbstractController
+final class ProfilAdminController extends AbstractController
 {
-    #[Route('/client/profil', name: 'app_client_profil')]
+    #[Route('/profil', name: 'app_admin_profil')]
     public function profil(Request $request, EntityManagerInterface $em, CountryService $countryService): Response
     {
         $session = $request->getSession();
@@ -37,14 +37,14 @@ final class ProfilClientController extends AbstractController
 
         $countries = $countryService->getCountries();
 
-        return $this->render('client/profil.html.twig', [
+        return $this->render('admin/profil.html.twig', [
             'user' => $user,
             'imagePath' => $imagePath,
             'countries' => $countries,
         ]);
     }
 
-    #[Route('/client/profil/update', name: 'app_client_update_profile', methods: ['POST'])]
+    #[Route('profil/update', name: 'app_admin_update_profile', methods: ['POST'])]
     public function updateProfil(Request $request, EntityManagerInterface $em): Response
     {
         $session = $request->getSession();
@@ -69,12 +69,12 @@ final class ProfilClientController extends AbstractController
 
         if (empty($username)) {
             $this->addFlash('error', 'Le nom d\'utilisateur ne peut pas être vide');
-            return $this->redirectToRoute('app_client_profil');
+            return $this->redirectToRoute('app_admin_profil');
         }
 
         if (empty($email)) {
             $this->addFlash('error', 'L\'email ne peut pas être vide');
-            return $this->redirectToRoute('app_client_profil');
+            return $this->redirectToRoute('app_admin_profil');
         }
 
         /** @var UploadedFile|null $imageFile */
@@ -108,10 +108,10 @@ final class ProfilClientController extends AbstractController
         $session->set('user', $userSession);
 
         $this->addFlash('success', 'Profil mis à jour avec succès');
-        return $this->redirectToRoute('app_client_profil');
+        return $this->redirectToRoute('app_admin_profil');
     }
 
-    #[Route('/api/client/profil', name: 'api_client_profil', methods: ['GET'])]
+    #[Route('/api/admin/profil', name: 'api_admin_profil', methods: ['GET'])]
     public function apiProfil(Request $request, EntityManagerInterface $em): Response
     {
         $session = $request->getSession();
@@ -138,7 +138,7 @@ final class ProfilClientController extends AbstractController
         ]);
     }
 
-    #[Route('/api/client/profil/update', name: 'api_client_update_profile', methods: ['POST'])]
+    #[Route('/api/admin/profil/update', name: 'api_admin_update_profile', methods: ['POST'])]
     public function apiUpdateProfil(Request $request, EntityManagerInterface $em): Response
     {
         $session = $request->getSession();

@@ -7,7 +7,11 @@
         <h1 class="text-center mb-4">🎥 Regarder le Live</h1>
 
         <div class="video-container text-center">
-            <video id="viewerVideo" autoplay playsinline controls width="100%" class="mb-4"></video>
+            <video id="viewerVideo" autoplay playsinline controls muted width="100%" class="mb-4"></video>
+            <div id="status" class="alert alert-info">En attente du stream...</div>
+            <button id="playButton" class="btn btn-success btn-lg" style="display: none;">
+                ▶️ Cliquer pour démarrer le live
+            </button>
         </div>
     </div>
 {% endblock %}
@@ -15,39 +19,86 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        const viewerId = '{{ userId }}'; // <- ID du user connecté injecté depuis PHP
+        const viewerId = '{{ userId }}';
+
+        function debugLog(message) {
+            console.log(message);
+        }
 
         document.addEventListener("DOMContentLoaded", function () {
-            const signalingServer = new WebSocket('ws://localhost:8080');
+            debugLog(`🚀 Démarrage du viewer avec ID: ${viewerId}`);
+
+            const signalingServer = new WebSocket('ws://localhost:9090');
             let peerConnection;
+            const statusDiv = document.getElementById('status');
+            const playButton = document.getElementById('playButton');
+            const video = document.getElementById('viewerVideo');
+
+            // Bouton pour démarrer manuellement la lecture
+            playButton.addEventListener('click', () => {
+                video.play().then(() => {
+                    debugLog('✅ Lecture manuelle réussie');
+                    playButton.style.display = 'none';
+                    statusDiv.textContent = 'Stream en cours...';
+                    statusDiv.className = 'alert alert-success';
+                }).catch(e => {
+                    debugLog(`❌ Erreur lecture manuelle: ${e.message}`);
+                });
+            });
 
             signalingServer.onopen = () => {
-                console.log('Connexion au signaling server établie');
+                debugLog('✅ Connexion WebSocket établie');
+                statusDiv.textContent = 'Connexion établie, en attente du stream...';
+
                 signalingServer.send(JSON.stringify({
                     type: 'viewer',
-                    viewerId: viewerId  // <- identifiant utilisateur envoyé
+                    viewerId: viewerId
                 }));
             };
 
             signalingServer.onerror = (error) => {
-                console.error('Erreur WebSocket:', error);
+                debugLog(`❌ Erreur WebSocket: ${error}`);
+                statusDiv.textContent = 'Erreur de connexion WebSocket';
+                statusDiv.className = 'alert alert-danger';
             };
 
             signalingServer.onclose = () => {
-                console.log('Connexion WebSocket fermée');
+                debugLog('🔌 Connexion WebSocket fermée');
+                statusDiv.textContent = 'Connexion fermée';
+                statusDiv.className = 'alert alert-warning';
             };
 
             signalingServer.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
-                console.log('Message reçu du signaling server:', data);
+                debugLog(`📥 Message reçu: ${data.type}`);
 
                 if (data.type === 'offer') {
-                    peerConnection = new RTCPeerConnection();
+                    debugLog('🎯 Traitement de l\'offre reçue');
+                    statusDiv.textContent = 'Offre reçue, établissement de la connexion...';
+
+                    peerConnection = new RTCPeerConnection({
+                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                    });
 
                     peerConnection.ontrack = event => {
-                        const video = document.getElementById('viewerVideo');
+                        debugLog(`🎥 Track reçu! Streams: ${event.streams.length}`);
+
                         if (event.streams && event.streams[0]) {
+                            debugLog('✅ Stream assigné à la vidéo');
                             video.srcObject = event.streams[0];
+
+                            // Essayer de lire automatiquement
+                            video.play().then(() => {
+                                debugLog('✅ Lecture automatique réussie');
+                                statusDiv.textContent = 'Stream en cours...';
+                                statusDiv.className = 'alert alert-success';
+                            }).catch(e => {
+                                debugLog(`⚠️ Autoplay bloqué: ${e.message}`);
+                                // Montrer le bouton play si autoplay échoue
+                                playButton.style.display = 'block';
+                                statusDiv.textContent = 'Stream reçu - Cliquez pour démarrer';
+                                statusDiv.className = 'alert alert-warning';
+                            });
                         }
                     };
 
@@ -57,24 +108,40 @@
                                 type: 'candidate',
                                 candidate: e.candidate,
                                 target: 'streamer',
-                                viewerId: viewerId  // <- inclure l’ID ici aussi
+                                viewerId: viewerId
                             }));
                         }
                     };
 
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                    const answer = await peerConnection.createAnswer();
-                    await peerConnection.setLocalDescription(answer);
+                    peerConnection.onconnectionstatechange = () => {
+                        const state = peerConnection.connectionState;
+                        debugLog(`🔗 Connection state: ${state}`);
+                    };
 
-                    signalingServer.send(JSON.stringify({
-                        type: 'answer',
-                        answer: answer,
-                        viewerId: viewerId  // <- idem ici
-                    }));
+                    try {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+
+                        signalingServer.send(JSON.stringify({
+                            type: 'answer',
+                            answer: answer,
+                            viewerId: viewerId
+                        }));
+
+                    } catch (error) {
+                        debugLog(`❌ Erreur WebRTC: ${error.message}`);
+                        statusDiv.textContent = 'Erreur lors de la connexion';
+                        statusDiv.className = 'alert alert-danger';
+                    }
                 }
                 else if (data.type === 'candidate') {
                     if (peerConnection) {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        } catch (error) {
+                            debugLog(`❌ Erreur ICE candidate: ${error.message}`);
+                        }
                     }
                 }
             };

@@ -3,6 +3,16 @@
 {% block title %}Live en direct{% endblock %}
 
 {% block body %}
+    <div class="form-group mb-4">
+        <label for="adminSelect">🎙️ Choisissez un live :</label>
+        <select id="adminSelect" class="form-control">
+            <option disabled selected>-- Sélectionner un streamer --</option>
+            {% for live in lives %}
+                <option value="{{ live.seller.id }}">{{ live.seller.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
     <div class="container mt-5">
         <h1 class="text-center mb-4">🎥 Regarder le Live</h1>
 
@@ -26,77 +36,85 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            debugLog(`🚀 Démarrage du viewer avec ID: ${viewerId}`);
+            debugLog(`🚀 Viewer démarré: ID = ${viewerId}`);
 
             const signalingServer = new WebSocket('ws://localhost:9090');
             let peerConnection;
             const statusDiv = document.getElementById('status');
             const playButton = document.getElementById('playButton');
             const video = document.getElementById('viewerVideo');
+            const adminSelect = document.getElementById('adminSelect');
 
-            // Bouton pour démarrer manuellement la lecture
+            let selectedAdminId = null;
+
             playButton.addEventListener('click', () => {
                 video.play().then(() => {
-                    debugLog('✅ Lecture manuelle réussie');
+                    debugLog('✅ Lecture manuelle démarrée');
                     playButton.style.display = 'none';
                     statusDiv.textContent = 'Stream en cours...';
                     statusDiv.className = 'alert alert-success';
                 }).catch(e => {
-                    debugLog(`❌ Erreur lecture manuelle: ${e.message}`);
+                    debugLog(`❌ Erreur lecture: ${e.message}`);
                 });
             });
 
             signalingServer.onopen = () => {
-                debugLog('✅ Connexion WebSocket établie');
-                statusDiv.textContent = 'Connexion établie, en attente du stream...';
-
-                signalingServer.send(JSON.stringify({
-                    type: 'viewer',
-                    viewerId: viewerId
-                }));
+                debugLog('✅ WebSocket ouvert');
+                statusDiv.textContent = 'WebSocket connecté. Sélectionnez un live.';
             };
 
-            signalingServer.onerror = (error) => {
+            signalingServer.onerror = error => {
                 debugLog(`❌ Erreur WebSocket: ${error}`);
                 statusDiv.textContent = 'Erreur de connexion WebSocket';
                 statusDiv.className = 'alert alert-danger';
             };
 
             signalingServer.onclose = () => {
-                debugLog('🔌 Connexion WebSocket fermée');
-                statusDiv.textContent = 'Connexion fermée';
+                debugLog('🔌 WebSocket fermé');
+                statusDiv.textContent = 'Connexion WebSocket fermée';
                 statusDiv.className = 'alert alert-warning';
             };
 
-            signalingServer.onmessage = async (event) => {
+            // Lorsqu’un streamer est sélectionné
+            adminSelect.addEventListener('change', () => {
+                selectedAdminId = adminSelect.value;
+                debugLog(`🎯 Streamer sélectionné: ${selectedAdminId}`);
+
+                if (signalingServer.readyState === WebSocket.OPEN) {
+                    signalingServer.send(JSON.stringify({
+                        type: 'viewer',
+                        viewerId: viewerId,
+                        adminId: selectedAdminId
+                    }));
+
+                    statusDiv.textContent = 'Demande de connexion au streamer...';
+                }
+            });
+
+            signalingServer.onmessage = async event => {
                 const data = JSON.parse(event.data);
-                debugLog(`📥 Message reçu: ${data.type}`);
+                debugLog(`📩 Message reçu: ${data.type}`);
+
+                if (data.type === 'streamerUnavailable') {
+                    statusDiv.textContent = 'Le streamer n\'est pas disponible';
+                    statusDiv.className = 'alert alert-warning';
+                    return;
+                }
 
                 if (data.type === 'offer') {
-                    debugLog('🎯 Traitement de l\'offre reçue');
-                    statusDiv.textContent = 'Offre reçue, établissement de la connexion...';
-
                     peerConnection = new RTCPeerConnection({
                         iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
                     });
 
                     peerConnection.ontrack = event => {
-                        debugLog(`🎥 Track reçu! Streams: ${event.streams.length}`);
-
                         if (event.streams && event.streams[0]) {
-                            debugLog('✅ Stream assigné à la vidéo');
                             video.srcObject = event.streams[0];
-
-                            // Essayer de lire automatiquement
                             video.play().then(() => {
-                                debugLog('✅ Lecture automatique réussie');
                                 statusDiv.textContent = 'Stream en cours...';
                                 statusDiv.className = 'alert alert-success';
-                            }).catch(e => {
-                                debugLog(`⚠️ Autoplay bloqué: ${e.message}`);
-                                // Montrer le bouton play si autoplay échoue
+                            }).catch(err => {
                                 playButton.style.display = 'block';
-                                statusDiv.textContent = 'Stream reçu - Cliquez pour démarrer';
+                                statusDiv.textContent = 'Stream prêt. Cliquez pour démarrer';
                                 statusDiv.className = 'alert alert-warning';
                             });
                         }
@@ -113,35 +131,20 @@
                         }
                     };
 
-                    peerConnection.onconnectionstatechange = () => {
-                        const state = peerConnection.connectionState;
-                        debugLog(`🔗 Connection state: ${state}`);
-                    };
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
 
-                    try {
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-
-                        signalingServer.send(JSON.stringify({
-                            type: 'answer',
-                            answer: answer,
-                            viewerId: viewerId
-                        }));
-
-                    } catch (error) {
-                        debugLog(`❌ Erreur WebRTC: ${error.message}`);
-                        statusDiv.textContent = 'Erreur lors de la connexion';
-                        statusDiv.className = 'alert alert-danger';
-                    }
+                    signalingServer.send(JSON.stringify({
+                        type: 'answer',
+                        answer: answer,
+                        viewerId: viewerId
+                    }));
                 }
+
                 else if (data.type === 'candidate') {
                     if (peerConnection) {
-                        try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                        } catch (error) {
-                            debugLog(`❌ Erreur ICE candidate: ${error.message}`);
-                        }
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
                     }
                 }
             };

@@ -13,21 +13,27 @@ use App\Entity\Live;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Repository\LiveRepository;
 
 class ClientController extends AbstractController
 {
     #[Route('/client', name: 'app_client')]
-    public function index(Request $request,
+    public function index(
+        Request $request,
         CategoryRepository $categoryRepository,
         UsersRepository $usersRepository,
-        SaleRepository $saleRepository
-    ): Response
-    {
+        SaleRepository $saleRepository,
+        LiveRepository $liveRepository
+    ): Response {
         $session = $request->getSession();
         $user = $session->get('user');
 
+        // Récupérer les lives actifs
+        $activeLives = $liveRepository->findActiveLives();
+
         return $this->render('client/index.html.twig', [
-            'userId' => $user->getId()  // ← Ce n'est pas un ID, c'est un objet Users
+            'userId' => $user->getId(),
+            'lives' => $activeLives,
         ]);
     }
 }

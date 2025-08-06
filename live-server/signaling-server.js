@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 9090 });
+const wss = new WebSocket.Server({ port: 9090, host: '0.0.0.0' });
 
 const viewers = new Map(); // viewerId => socket
 const streamers = new Map(); // adminId => socket

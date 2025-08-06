@@ -1,31 +1,23 @@
-const fs = require('fs');
-const https = require('https');
 const WebSocket = require('ws');
-
-// Charger tes certificats
-const server = https.createServer({
-  cert: fs.readFileSync('cert.pem'),
-  key: fs.readFileSync('key.pem')
-});
-
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ port: 9090 });
 
 const viewers = new Map(); // viewerId => socket
 const streamers = new Map(); // adminId => socket
 
-console.log('🚀 Serveur WebSocket (WSS) prêt');
+console.log('🚀 Serveur WebSocket démarré sur le port 9090');
 
 function broadcastActiveStreamers() {
     const activeAdmins = Array.from(streamers.keys());
+
     viewers.forEach(viewerWs => {
-      if (viewerWs.readyState === WebSocket.OPEN) {
-        viewerWs.send(JSON.stringify({
-          type: 'activeStreamers',
-          streamers: activeAdmins
-        }));
-      }
+        if (viewerWs.readyState === WebSocket.OPEN) {
+            viewerWs.send(JSON.stringify({
+                type: 'activeStreamers',
+                streamers: activeAdmins
+            }));
+        }
     });
-  }
+}
 
 wss.on('connection', ws => {
     console.log('🙋‍♂️ Nouveau client connecté');
@@ -135,11 +127,6 @@ wss.on('connection', ws => {
     ws.on('error', (error) => {
         console.error('❌ Erreur WebSocket:', error);
     });
-});
-
-const PORT = 9090;
-server.listen(PORT, () => {
-  console.log(`🚀 Serveur HTTPS + WSS démarré sur le port ${PORT}`);
 });
 
 // Ménage régulier

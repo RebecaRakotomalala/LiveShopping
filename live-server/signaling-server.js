@@ -27,8 +27,8 @@ let useHTTPS = false;
 try {
     // Essayer de charger les certificats
     server = https.createServer({
-        cert: fs.readFileSync('cert.pem'),
-        key: fs.readFileSync('key.pem')
+        cert: fs.readFileSync('./192.168.88.21.pem'),
+        key: fs.readFileSync('./192.168.88.21-key.pem')
     });
     useHTTPS = true;
     console.log('🔒 Mode HTTPS activé');
@@ -87,34 +87,35 @@ wss.on('connection', (ws, req) => {
 
             // Viewer se connecte
             else if (data.type === 'viewer' && data.viewerId && data.adminId) {
-                viewers.set(data.viewerId, {
-                    socket: ws,
-                    adminId: data.adminId,
-                    clientIP: clientIP
-                });
-                
+                const adminIdStr = data.adminId.toString();
+            
+                console.log('DEBUG - Clés dans streamers:', Array.from(streamers.keys()));
+                console.log('DEBUG - Recherche streamer avec adminId:', adminIdStr, typeof adminIdStr);
+            
+                viewers.set(data.viewerId, { socket: ws, adminId: adminIdStr, clientIP });
                 ws.viewerId = data.viewerId;
-                ws.adminId = data.adminId;
+                ws.adminId = adminIdStr;
                 ws.clientIP = clientIP;
-                
-                console.log(`👁️ Viewer ${data.viewerId} depuis ${clientIP} demande le live de ${data.adminId}`);
-
-                const streamerWs = streamers.get(data.adminId);
+            
+                console.log(`👁️ Viewer ${data.viewerId} depuis ${clientIP} demande le live de ${adminIdStr}`);
+            
+                const streamerWs = streamers.get(adminIdStr);
                 if (streamerWs && streamerWs.readyState === WebSocket.OPEN) {
                     streamerWs.send(JSON.stringify({
                         type: 'newViewer',
                         viewerId: data.viewerId,
                         viewerIP: clientIP
                     }));
-                    console.log(`✅ Notification envoyée au streamer ${data.adminId}`);
+                    console.log(`✅ Notification envoyée au streamer ${adminIdStr}`);
                 } else {
-                    console.log(`❌ Streamer ${data.adminId} non disponible`);
+                    console.log(`❌ Streamer ${adminIdStr} non disponible`);
                     ws.send(JSON.stringify({
                         type: 'streamerUnavailable',
-                        adminId: data.adminId
+                        adminId: adminIdStr
                     }));
                 }
             }
+            
 
             // Offer du streamer vers viewer
             else if (data.type === 'offer' && data.viewerId) {

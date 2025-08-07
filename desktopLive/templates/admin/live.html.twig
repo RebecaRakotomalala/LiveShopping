@@ -45,18 +45,14 @@
             debugLog('🚀 Démarrage du streamer');
 
             // Initialiser WebSocket EN PREMIER
-<<<<<<< Updated upstream
-            const signalingServer = new WebSocket('wss://192.168.88.26:8080');
-=======
-            const signalingServer = new WebSocket('ws://localhost:9090');
->>>>>>> Stashed changes
+            const signalingServer = new WebSocket('wss://192.168.88.21:9090');
             const peerConnections = new Map();
             let localStream;
 
             // Configuration des événements WebSocket
             signalingServer.onopen = () => {
                 debugLog('✅ Connexion WebSocket établie (streamer)');
-                const message = { type: 'streamer' };
+                const message = { type: 'streamer', adminId: '{{ seller.id }}'};
                 debugLog(`📤 Envoi message streamer: ${JSON.stringify(message)}`);
                 signalingServer.send(JSON.stringify(message));
             };

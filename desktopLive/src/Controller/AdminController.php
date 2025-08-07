@@ -202,6 +202,7 @@ class AdminController extends AbstractController
 
         return $this->render('admin/live.html.twig', [
             'live' => $activeLive,
+            'seller' => $user,
         ]);
     }
 }

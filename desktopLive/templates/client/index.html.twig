@@ -38,11 +38,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             debugLog(`🚀 Viewer démarré: ID = ${viewerId}`);
 
-<<<<<<< Updated upstream
-            const signalingServer = new WebSocket('wss://192.168.88.26:8080');
-=======
-            const signalingServer = new WebSocket('ws://localhost:9090');
->>>>>>> Stashed changes
+            const signalingServer = new WebSocket("wss://192.168.88.21:9090/");
             let peerConnection;
             const statusDiv = document.getElementById('status');
             const playButton = document.getElementById('playButton');
@@ -68,12 +64,17 @@
             };
 
             signalingServer.onerror = error => {
-                debugLog(`❌ Erreur WebSocket: ${error}`);
+                console.log("❌ Erreur WebSocket:", error); // Affiche l'objet complet
+                debugLog("❌ Erreur WebSocket:", error);    // Si debugLog() est une fonction maison
                 statusDiv.textContent = 'Erreur de connexion WebSocket';
                 statusDiv.className = 'alert alert-danger';
             };
 
             signalingServer.onclose = () => {
+                console.warn("🔌 Connexion WebSocket fermée.");
+                console.warn("Code:", event.code);
+                console.warn("Raison:", event.reason);
+                console.warn("Était-ce propre ?", event.wasClean);
                 debugLog('🔌 WebSocket fermé');
                 statusDiv.textContent = 'Connexion WebSocket fermée';
                 statusDiv.className = 'alert alert-warning';

@@ -38,7 +38,13 @@
         document.addEventListener("DOMContentLoaded", function () {
             debugLog(`🚀 Viewer démarré: ID = ${viewerId}`);
 
-            const signalingServer = new WebSocket('ws://localhost:9090');
+            // SOLUTION : Utiliser l'IP/hostname de la page web actuelle
+            const currentHost = window.location.hostname;
+            const websocketUrl = `ws://${currentHost}:9090`;
+
+            debugLog(`🌐 Connexion WebSocket à: ${websocketUrl}`);
+
+            const signalingServer = new WebSocket(websocketUrl);
             let peerConnection;
             const statusDiv = document.getElementById('status');
             const playButton = document.getElementById('playButton');
@@ -65,7 +71,7 @@
 
             signalingServer.onerror = error => {
                 debugLog(`❌ Erreur WebSocket: ${error}`);
-                statusDiv.textContent = 'Erreur de connexion WebSocket';
+                statusDiv.textContent = `Erreur de connexion WebSocket à ${currentHost}:9090`;
                 statusDiv.className = 'alert alert-danger';
             };
 
@@ -75,7 +81,7 @@
                 statusDiv.className = 'alert alert-warning';
             };
 
-            // Lorsqu’un streamer est sélectionné
+            // Lorsqu'un streamer est sélectionné
             adminSelect.addEventListener('change', () => {
                 selectedAdminId = adminSelect.value;
                 debugLog(`🎯 Streamer sélectionné: ${selectedAdminId}`);

@@ -44,8 +44,14 @@
         document.addEventListener("DOMContentLoaded", function () {
             debugLog('🚀 Démarrage du streamer');
 
-            // Initialiser WebSocket EN PREMIER
-            const signalingServer = new WebSocket('ws://localhost:9090');
+            // SOLUTION : Utiliser l'IP/hostname de la page web actuelle
+            const currentHost = window.location.hostname;
+            const websocketUrl = `ws://${currentHost}:9090`;
+
+            debugLog(`🌐 Connexion WebSocket à: ${websocketUrl}`);
+
+            // Initialiser WebSocket avec l'adresse dynamique
+            const signalingServer = new WebSocket(websocketUrl);
             const peerConnections = new Map();
             let localStream;
 
@@ -59,6 +65,7 @@
 
             signalingServer.onerror = (error) => {
                 debugLog(`❌ Erreur WebSocket: ${error}`);
+                debugLog(`❌ Vérifiez que le serveur Node.js écoute sur ${currentHost}:9090`);
                 console.error('WebSocket Error:', error);
             };
 

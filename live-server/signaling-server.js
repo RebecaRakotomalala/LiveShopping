@@ -17,11 +17,59 @@ console.log(`📡 Le serveur est accessible depuis l'extérieur sur votre IP loc
 
 // Afficher l'IP locale pour faciliter la configuration
 const os = require('os');
-const networkInterfaces = os.networkInterfaces();
-Object.keys(networkInterfaces).forEach(interfaceName => {
-    networkInterfaces[interfaceName].forEach(interface => {
-        if (interface.family === 'IPv4' && !interface.internal) {
-            console.log(`🌐 IP locale détectée: ${interface.address}:${SERVER_PORT}`);
+
+// Fonction pour obtenir l'IP locale
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const interface of interfaces[name]) {
+            if (interface.family === 'IPv4' && !interface.internal) {
+                return interface.address;
+            }
+        }
+    }
+    return '127.0.0.1';
+}
+
+const LOCAL_IP = getLocalIP();
+console.log(`🌐 IP du serveur: ${LOCAL_IP}`);
+
+// Option 1: HTTPS avec certificats (recommandé pour production)
+let server;
+let useHTTPS = false;
+
+try {
+    // Essayer de charger les certificats
+    server = https.createServer({
+        cert: fs.readFileSync('cert.pem'),
+        key: fs.readFileSync('key.pem')
+    });
+    useHTTPS = true;
+    console.log('🔒 Mode HTTPS activé');
+} catch (error) {
+    // Si pas de certificats, utiliser HTTP (pour développement uniquement)
+    console.log('⚠️ Certificats non trouvés, basculement en HTTP');
+    server = http.createServer();
+    useHTTPS = false;
+}
+
+const wss = new WebSocket.Server({ server });
+
+const viewers = new Map(); // viewerId => { socket, adminId }
+const streamers = new Map(); // adminId => socket
+
+console.log('🚀 Serveur WebSocket prêt');
+
+function broadcastActiveStreamers() {
+    const activeAdmins = Array.from(streamers.keys());
+    console.log(`📡 Diffusion des streamers actifs: [${activeAdmins.join(', ')}]`);
+    
+    viewers.forEach((viewerData, viewerId) => {
+        if (viewerData.socket.readyState === WebSocket.OPEN) {
+            viewerData.socket.send(JSON.stringify({
+                type: 'activeStreamers',
+                streamers: activeAdmins
+            }));
         }
     });
 });
@@ -54,27 +102,37 @@ wss.on('connection', (ws, req) => {
             }
             
             // Viewer se connecte
-            else if (data.type === 'viewer') {
-                const viewerId = data.viewerId;
-                ws.viewerId = viewerId;
-                ws.clientIP = clientIP;
-                viewers.set(viewerId, ws);
-                console.log(`👁️ Viewer connecté: ${viewerId} depuis ${clientIP} - Total viewers:`, viewers.size);
-                
-                // Notifier tous les streamers qu'un nouveau viewer s'est connecté
-                streamers.forEach(streamerWs => {
-                    if (streamerWs.readyState === WebSocket.OPEN) {
-                        streamerWs.send(JSON.stringify({
-                            type: 'newViewer',
-                            viewerId: viewerId,
-                            viewerIP: clientIP
-                        }));
-                        console.log(`📡 Nouveau viewer ${viewerId} (${clientIP}) signalé au streamer`);
-                    }
+            else if (data.type === 'viewer' && data.viewerId && data.adminId) {
+                viewers.set(data.viewerId, {
+                    socket: ws,
+                    adminId: data.adminId,
+                    clientIP: clientIP
                 });
+                
+                ws.viewerId = data.viewerId;
+                ws.adminId = data.adminId;
+                ws.clientIP = clientIP;
+                
+                console.log(`👁️ Viewer ${data.viewerId} depuis ${clientIP} demande le live de ${data.adminId}`);
+
+                const streamerWs = streamers.get(data.adminId);
+                if (streamerWs && streamerWs.readyState === WebSocket.OPEN) {
+                    streamerWs.send(JSON.stringify({
+                        type: 'newViewer',
+                        viewerId: data.viewerId,
+                        viewerIP: clientIP
+                    }));
+                    console.log(`✅ Notification envoyée au streamer ${data.adminId}`);
+                } else {
+                    console.log(`❌ Streamer ${data.adminId} non disponible`);
+                    ws.send(JSON.stringify({
+                        type: 'streamerUnavailable',
+                        adminId: data.adminId
+                    }));
+                }
             }
-            
-            // Offer du streamer vers un viewer spécifique
+
+            // Offer du streamer vers viewer
             else if (data.type === 'offer' && data.viewerId) {
                 const viewer = viewers.get(data.viewerId);
                 if (viewer && viewer.readyState === WebSocket.OPEN) {

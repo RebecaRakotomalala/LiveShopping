@@ -44,21 +44,14 @@
         document.addEventListener("DOMContentLoaded", function () {
             debugLog('🚀 Démarrage du streamer');
 
-            // SOLUTION : Utiliser l'IP/hostname de la page web actuelle
-            const currentHost = window.location.hostname;
-            const websocketUrl = `ws://${currentHost}:9090`;
-
-            debugLog(`🌐 Connexion WebSocket à: ${websocketUrl}`);
-
-            // Initialiser WebSocket avec l'adresse dynamique
-            const signalingServer = new WebSocket(websocketUrl);
+            const signalingServer = new WebSocket('ws://localhost:9090');
             const peerConnections = new Map();
             let localStream;
 
             // Configuration des événements WebSocket
             signalingServer.onopen = () => {
                 debugLog('✅ Connexion WebSocket établie (streamer)');
-                const message = { type: 'streamer' };
+                const message = { type: 'streamer', adminId: '{{ seller.id }}'};
                 debugLog(`📤 Envoi message streamer: ${JSON.stringify(message)}`);
                 signalingServer.send(JSON.stringify(message));
             };

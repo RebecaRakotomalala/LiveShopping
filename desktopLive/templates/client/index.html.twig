@@ -37,14 +37,7 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             debugLog(`🚀 Viewer démarré: ID = ${viewerId}`);
-
-            // SOLUTION : Utiliser l'IP/hostname de la page web actuelle
-            const currentHost = window.location.hostname;
-            const websocketUrl = `ws://${currentHost}:9090`;
-
-            debugLog(`🌐 Connexion WebSocket à: ${websocketUrl}`);
-
-            const signalingServer = new WebSocket(websocketUrl);
+            const signalingServer = new WebSocket('ws://localhost:9090');
             let peerConnection;
             const statusDiv = document.getElementById('status');
             const playButton = document.getElementById('playButton');
@@ -71,11 +64,15 @@
 
             signalingServer.onerror = error => {
                 debugLog(`❌ Erreur WebSocket: ${error}`);
-                statusDiv.textContent = `Erreur de connexion WebSocket à ${currentHost}:9090`;
+                statusDiv.textContent = 'Erreur de connexion WebSocket';
                 statusDiv.className = 'alert alert-danger';
             };
 
             signalingServer.onclose = () => {
+                console.warn("🔌 Connexion WebSocket fermée.");
+                console.warn("Code:", event.code);
+                console.warn("Raison:", event.reason);
+                console.warn("Était-ce propre ?", event.wasClean);
                 debugLog('🔌 WebSocket fermé');
                 statusDiv.textContent = 'Connexion WebSocket fermée';
                 statusDiv.className = 'alert alert-warning';

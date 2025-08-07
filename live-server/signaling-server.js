@@ -1,310 +1,138 @@
-const fs = require('fs');
-const https = require('https');
-const http = require('http');
 const WebSocket = require('ws');
-const os = require('os');
-
-// Fonction pour obtenir l'IP locale
-function getLocalIP() {
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const interface of interfaces[name]) {
-            if (interface.family === 'IPv4' && !interface.internal) {
-                return interface.address;
-            }
-        }
-    }
-    return '127.0.0.1';
-}
-
-const LOCAL_IP = getLocalIP();
-console.log(`🌐 IP du serveur: ${LOCAL_IP}`);
-
-// Option 1: HTTPS avec certificats (recommandé pour production)
-let server;
-let useHTTPS = false;
-
-try {
-    // Essayer de charger les certificats
-    server = https.createServer({
-        cert: fs.readFileSync('cert.pem'),
-        key: fs.readFileSync('key.pem')
-    });
-    useHTTPS = true;
-    console.log('🔒 Mode HTTPS activé');
-} catch (error) {
-    // Si pas de certificats, utiliser HTTP (pour développement uniquement)
-    console.log('⚠️ Certificats non trouvés, basculement en HTTP');
-    server = http.createServer();
-    useHTTPS = false;
-}
-
-const wss = new WebSocket.Server({ server });
-
-const viewers = new Map(); // viewerId => { socket, adminId }
-const streamers = new Map(); // adminId => socket
-
-console.log('🚀 Serveur WebSocket prêt');
-
-function broadcastActiveStreamers() {
-    const activeAdmins = Array.from(streamers.keys());
-    console.log(`📡 Diffusion des streamers actifs: [${activeAdmins.join(', ')}]`);
-    
-    viewers.forEach((viewerData, viewerId) => {
-        if (viewerData.socket.readyState === WebSocket.OPEN) {
-            viewerData.socket.send(JSON.stringify({
-                type: 'activeStreamers',
-                streamers: activeAdmins
-            }));
-        }
-    });
-}
-
-wss.on('connection', (ws, req) => {
-    const clientIP = req.socket.remoteAddress || req.connection.remoteAddress;
-    console.log(`🙋‍♂️ Nouvelle connexion depuis ${clientIP}`);
-
-    // Ping/Pong pour maintenir la connexion
-    ws.isAlive = true;
-    ws.on('pong', () => {
-        ws.isAlive = true;
-    });
-
+const wss = new WebSocket.Server({ port: 9090 });
+const viewers = new Map(); // viewerId => socket
+const streamers = new Set(); // ensemble des streamers
+console.log(':fusée: Serveur WebSocket démarré sur le port 9090');
+wss.on('connection', ws => {
+    console.log(':homme_levant_la_main: Nouveau client connecté');
     ws.on('message', msg => {
         try {
             const data = JSON.parse(msg);
-            console.log(`📩 Message de ${clientIP}:`, data.type);
-
+            console.log(":enveloppe_avec_flèche: Message reçu:", data.type, data);
             // Streamer se connecte
-            if (data.type === 'streamer' && data.adminId) {
-                streamers.set(data.adminId, ws);
+            if (data.type === 'streamer') {
+                streamers.add(ws);
                 ws.isStreamer = true;
-                ws.adminId = data.adminId;
-                ws.clientIP = clientIP;
-                console.log(`🎥 Streamer connecté [adminId=${data.adminId}] depuis ${clientIP}`);
-                broadcastActiveStreamers();
-            }
-
-            // Viewer se connecte
-            else if (data.type === 'viewer' && data.viewerId && data.adminId) {
-                viewers.set(data.viewerId, {
-                    socket: ws,
-                    adminId: data.adminId,
-                    clientIP: clientIP
+                console.log(":filmer: Streamer connecté - Total streamers:", streamers.size);
+                // Notifier tous les viewers qu'un streamer est disponible
+                viewers.forEach((viewerWs, viewerId) => {
+                    console.log(`:haut_parleur: Notification du streamer au viewer ${viewerId}`);
                 });
-                
-                ws.viewerId = data.viewerId;
-                ws.adminId = data.adminId;
-                ws.clientIP = clientIP;
-                
-                console.log(`👁️ Viewer ${data.viewerId} depuis ${clientIP} demande le live de ${data.adminId}`);
-
-                const streamerWs = streamers.get(data.adminId);
-                if (streamerWs && streamerWs.readyState === WebSocket.OPEN) {
-                    streamerWs.send(JSON.stringify({
-                        type: 'newViewer',
-                        viewerId: data.viewerId,
-                        viewerIP: clientIP
-                    }));
-                    console.log(`✅ Notification envoyée au streamer ${data.adminId}`);
-                } else {
-                    console.log(`❌ Streamer ${data.adminId} non disponible`);
-                    ws.send(JSON.stringify({
-                        type: 'streamerUnavailable',
-                        adminId: data.adminId
-                    }));
-                }
             }
-
-            // Offer du streamer vers viewer
+            // Viewer se connecte
+            else if (data.type === 'viewer') {
+                const viewerId = data.viewerId;
+                ws.viewerId = viewerId;
+                viewers.set(viewerId, ws);
+                console.log(`:œil: Viewer connecté: ${viewerId} - Total viewers:`, viewers.size);
+                // Notifier tous les streamers qu'un nouveau viewer s'est connecté
+                streamers.forEach(streamerWs => {
+                    if (streamerWs.readyState === WebSocket.OPEN) {
+                        streamerWs.send(JSON.stringify({
+                            type: 'newViewer',
+                            viewerId: viewerId
+                        }));
+                        console.log(`:antenne_satellite: Nouveau viewer ${viewerId} signalé au streamer`);
+                    }
+                });
+            }
+            // Offer du streamer vers un viewer spécifique
             else if (data.type === 'offer' && data.viewerId) {
-                const viewerData = viewers.get(data.viewerId);
-                if (viewerData && viewerData.socket.readyState === WebSocket.OPEN) {
-                    viewerData.socket.send(JSON.stringify({
+                const viewer = viewers.get(data.viewerId);
+                if (viewer && viewer.readyState === WebSocket.OPEN) {
+                    viewer.send(JSON.stringify({
                         type: 'offer',
                         offer: data.offer,
                         viewerId: data.viewerId
                     }));
-                    console.log(`📤 Offer envoyée au viewer ${data.viewerId}`);
+                    console.log(`:outbox: Offer transférée au viewer ${data.viewerId}`);
                 } else {
-                    console.log(`❌ Viewer ${data.viewerId} non trouvé ou déconnecté`);
+                    console.warn(`:danger: Viewer ${data.viewerId} non trouvé ou déconnecté`);
                 }
             }
-
-            // Answer du viewer vers streamer
+            // Answer du viewer vers le streamer
             else if (data.type === 'answer' && data.viewerId) {
-                const viewerData = viewers.get(data.viewerId);
-                if (viewerData) {
-                    const streamerWs = streamers.get(viewerData.adminId);
-                    if (streamerWs && streamerWs.readyState === WebSocket.OPEN) {
+                streamers.forEach(streamerWs => {
+                    if (streamerWs.readyState === WebSocket.OPEN) {
                         streamerWs.send(JSON.stringify({
                             type: 'answer',
                             answer: data.answer,
                             viewerId: data.viewerId
                         }));
-                        console.log(`📤 Answer envoyée au streamer ${viewerData.adminId}`);
+                        console.log(`:outbox: Answer du viewer ${data.viewerId} transférée au streamer`);
                     }
-                }
+                });
             }
-
             // ICE candidates
             else if (data.type === 'candidate') {
                 if (data.target === 'viewer' && data.viewerId) {
-                    const viewerData = viewers.get(data.viewerId);
-                    if (viewerData && viewerData.socket.readyState === WebSocket.OPEN) {
-                        viewerData.socket.send(JSON.stringify({
+                    const viewer = viewers.get(data.viewerId);
+                    if (viewer && viewer.readyState === WebSocket.OPEN) {
+                        viewer.send(JSON.stringify({
                             type: 'candidate',
                             candidate: data.candidate,
                             viewerId: data.viewerId
                         }));
+                        console.log(`:glaçon: ICE candidate transféré au viewer ${data.viewerId}`);
                     }
                 } else if (data.target === 'streamer' && data.viewerId) {
-                    const viewerData = viewers.get(data.viewerId);
-                    if (viewerData) {
-                        const streamer = streamers.get(viewerData.adminId);
-                        if (streamer && streamer.readyState === WebSocket.OPEN) {
-                            streamer.send(JSON.stringify({
+                    streamers.forEach(streamerWs => {
+                        if (streamerWs.readyState === WebSocket.OPEN) {
+                            streamerWs.send(JSON.stringify({
                                 type: 'candidate',
                                 candidate: data.candidate,
                                 viewerId: data.viewerId
                             }));
+                            console.log(`:glaçon: ICE candidate du viewer ${data.viewerId} transféré au streamer`);
                         }
-                    }
+                    });
                 }
             }
-
-            // Demande de liste des streamers actifs
-            else if (data.type === 'getActiveStreamers') {
-                const activeAdmins = Array.from(streamers.keys());
-                ws.send(JSON.stringify({
-                    type: 'activeStreamers',
-                    streamers: activeAdmins
-                }));
-            }
-
         } catch (error) {
-            console.error(`❌ Erreur parsing JSON depuis ${clientIP}:`, error);
+            console.error(':x: Erreur lors du parsing du message:', error);
         }
     });
-
     ws.on('close', () => {
-        console.log(`🔌 Connexion fermée depuis ${clientIP}`);
-        
+        console.log(':salut_main: Client déconnecté');
         if (ws.viewerId) {
             viewers.delete(ws.viewerId);
-            console.log(`👁️ Viewer ${ws.viewerId} déconnecté`);
+            console.log(`:œil: Viewer ${ws.viewerId} supprimé - Total viewers:`, viewers.size);
         }
-
-        if (ws.isStreamer && ws.adminId) {
-            streamers.delete(ws.adminId);
-            console.log(`🎥 Streamer ${ws.adminId} déconnecté`);
-            
-            // Notifier les viewers que le streamer est déconnecté
-            viewers.forEach((viewerData, viewerId) => {
-                if (viewerData.adminId === ws.adminId && viewerData.socket.readyState === WebSocket.OPEN) {
-                    viewerData.socket.send(JSON.stringify({
-                        type: 'streamerDisconnected',
-                        adminId: ws.adminId
+        if (ws.isStreamer) {
+            streamers.delete(ws);
+            console.log(`:filmer: Streamer supprimé - Total streamers:`, streamers.size);
+            // Notifier tous les viewers que le streamer s'est déconnecté
+            viewers.forEach((viewerWs, viewerId) => {
+                if (viewerWs.readyState === WebSocket.OPEN) {
+                    viewerWs.send(JSON.stringify({
+                        type: 'streamerDisconnected'
                     }));
                 }
             });
-            
-            broadcastActiveStreamers();
         }
     });
-
     ws.on('error', (error) => {
-        console.error(`❌ Erreur WebSocket depuis ${clientIP}:`, error);
+        console.error(':x: Erreur WebSocket:', error);
     });
-
-    // Envoyer la liste des streamers actifs au nouveau client
-    setTimeout(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-            broadcastActiveStreamers();
-        }
-    }, 1000);
 });
-
-// Heartbeat pour maintenir les connexions
-const interval = setInterval(() => {
-    wss.clients.forEach(ws => {
-        if (ws.isAlive === false) {
-            console.log(`💀 Connexion morte détectée, fermeture...`);
-            return ws.terminate();
-        }
-        
-        ws.isAlive = false;
-        ws.ping();
-    });
-}, 30000);
-
-wss.on('close', () => {
-    clearInterval(interval);
-});
-
-// Nettoyage régulier
+// Nettoyage périodique des connexions fermées
 setInterval(() => {
-    let cleaned = 0;
-    
-    viewers.forEach((viewerData, viewerId) => {
-        if (viewerData.socket.readyState !== WebSocket.OPEN) {
-            viewers.delete(viewerId);
-            cleaned++;
-        }
-    });
-
-    streamers.forEach((ws, adminId) => {
+    // Nettoyer les viewers déconnectés
+    viewers.forEach((ws, viewerId) => {
         if (ws.readyState !== WebSocket.OPEN) {
-            streamers.delete(adminId);
-            cleaned++;
+            viewers.delete(viewerId);
+            console.log(`:balai: Viewer ${viewerId} nettoyé`);
         }
     });
-
-    if (cleaned > 0) {
-        console.log(`🧹 Nettoyage: ${cleaned} connexions fermées supprimées`);
-        broadcastActiveStreamers();
-    }
-}, 60000);
-
-// Démarrage du serveur
-const PORT = 9090;
-server.listen(PORT, '0.0.0.0', () => {
-    const protocol = useHTTPS ? 'wss' : 'ws';
-    console.log(`🚀 Serveur ${protocol.toUpperCase()} démarré sur:`);
-    console.log(`   - Local: ${protocol}://localhost:${PORT}`);
-    console.log(`   - Réseau: ${protocol}://${LOCAL_IP}:${PORT}`);
-    console.log(`   - Toutes interfaces: ${protocol}://0.0.0.0:${PORT}`);
-    
-    if (!useHTTPS) {
-        console.log(`\n⚠️  ATTENTION: Mode HTTP non sécurisé activé`);
-        console.log(`   Pour la production, générez des certificats SSL avec:`);
-        console.log(`   openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes`);
-    }
-});
-
-// Gestion des signaux pour fermeture propre
-process.on('SIGINT', () => {
-    console.log('\n🛑 Arrêt du serveur...');
-    clearInterval(interval);
-    server.close(() => {
-        console.log('✅ Serveur arrêté proprement');
-        process.exit(0);
-    });
-});
-
-// Logs de diagnostic au démarrage
-console.log(`\n📊 Informations système:`);
-console.log(`   - Node.js: ${process.version}`);
-console.log(`   - Platform: ${process.platform}`);
-console.log(`   - Architecture: ${process.arch}`);
-console.log(`   - Interfaces réseau:`);
-
-const interfaces = os.networkInterfaces();
-Object.keys(interfaces).forEach(name => {
-    interfaces[name].forEach(interface => {
-        if (interface.family === 'IPv4') {
-            const type = interface.internal ? '(interne)' : '(externe)';
-            console.log(`     ${name}: ${interface.address} ${type}`);
+    // Nettoyer les streamers déconnectés
+    const deadStreamers = [];
+    streamers.forEach(ws => {
+        if (ws.readyState !== WebSocket.OPEN) {
+            deadStreamers.push(ws);
         }
     });
-});
+    deadStreamers.forEach(ws => {
+        streamers.delete(ws);
+        console.log(':balai: Streamer nettoyé');
+    });
+}, 30000); // Toutes les 30 secondes

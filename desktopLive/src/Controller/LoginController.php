@@ -89,6 +89,11 @@ final class LoginController extends AbstractController
             'user' => [
                 'id_user' => $user->getId(),
                 'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'contact' => $user->getContact(),
+                'address' => $user->getAddress(),
+                'country' => $user->getCountry(),
+                'image' => $user->getImages(),
                 'is_seller' => $user->isSeller(),
             ]
         ]);

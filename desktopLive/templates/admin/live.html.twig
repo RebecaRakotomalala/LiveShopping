@@ -29,8 +29,24 @@
     {% if live %}
         <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const signalingServer = new WebSocket('ws://localhost:8080');
-            const peerConnections = new Map();
+            // Détection auto de l'URL du serveur de signalisation avec fallback localhost
+            const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const altProto = proto === 'wss' ? 'ws' : 'wss';
+            const host = window.location.hostname || 'localhost';
+            const port = 9090;
+            const hosts = Array.from(new Set([
+                host,
+                'localhost',
+                '127.0.0.1',
+                '192.168.88.28' // IP fournie
+            ]));
+            const urlsTmp = [];
+            hosts.forEach(h => { urlsTmp.push(`${proto}://${h}:${port}`); urlsTmp.push(`${altProto}://${h}:${port}`); });
+            const urls = Array.from(new Set(urlsTmp));
+            console.log('[ADMIN-LIVE] WS candidates =', urls);
+
+            let signalingServer = null;
+            const peerConnections = new Map(); // key: viewerId -> RTCPeerConnection
             let localStream;
 
             navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -38,54 +54,92 @@
                     localStream = stream;
                     const webcam = document.getElementById("webcamPreview");
                     webcam.srcObject = stream;
+                    console.log('[ADMIN-LIVE] getUserMedia OK. tracks=', stream.getTracks().map(t=>t.kind));
 
-                    signalingServer.onopen = () => {
-                        signalingServer.send(JSON.stringify({ type: 'streamer' }));
-                    };
+                    function attachHandlers() {
+                        if (!signalingServer) return;
+                        signalingServer.onopen = () => {
+                            console.log('[ADMIN-LIVE] WS open');
+                            signalingServer.send(JSON.stringify({ type: 'streamer', adminId: {{ seller.id }} }));
+                            console.log('[ADMIN-LIVE] WS send streamer register adminId={{ seller.id }}');
+                        };
+                        signalingServer.onclose = (e) => console.warn('[ADMIN-LIVE] WS close', e.code, e.reason);
+                        signalingServer.onerror = (e) => console.error('[ADMIN-LIVE] WS error', e);
+                        signalingServer.onmessage = async (event) => {
+                            const data = JSON.parse(event.data);
+                            console.log('[ADMIN-LIVE] WS message', data);
 
-                    signalingServer.onmessage = async (event) => {
-                        const data = JSON.parse(event.data);
+                            if (data.type === 'newViewer') {
+                                console.log('[ADMIN-LIVE] newViewer', data.viewerId);
+                                // Crée une nouvelle PeerConnection pour ce viewer
+                                const pc = new RTCPeerConnection();
 
-                        if (data.type === 'newViewer') {
-                            // Crée une nouvelle PeerConnection pour ce viewer
-                            const pc = new RTCPeerConnection();
+                                // Ajoute les tracks locales (cam + micro)
+                                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-                            // Ajoute les tracks locales (cam + micro)
-                            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+                                pc.onicecandidate = e => {
+                                    if (e.candidate) {
+                                        console.log('[ADMIN-LIVE] ICE -> viewer', data.viewerId, e.candidate.type);
+                                        signalingServer.send(JSON.stringify({
+                                            type: 'candidate',
+                                            candidate: e.candidate,
+                                            target: 'viewer',
+                                            viewerId: data.viewerId
+                                        }));
+                                    }
+                                };
+                                pc.onconnectionstatechange = () => console.log('[ADMIN-LIVE] pc.connectionState', data.viewerId, pc.connectionState);
+                                pc.onsignalingstatechange = () => console.log('[ADMIN-LIVE] pc.signalingState', data.viewerId, pc.signalingState);
+                                pc.onicegatheringstatechange = () => console.log('[ADMIN-LIVE] pc.iceGatheringState', data.viewerId, pc.iceGatheringState);
 
-                            pc.onicecandidate = e => {
-                                if (e.candidate) {
-                                    signalingServer.send(JSON.stringify({
-                                        type: 'candidate',
-                                        candidate: e.candidate,
-                                        target: 'viewer',
-                                        viewerId: data.viewerId  // pour que le viewer sache à qui s'adresse ce message
-                                    }));
-                                }
-                            };
+                                // Crée une offre SDP
+                                const offer = await pc.createOffer();
+                                await pc.setLocalDescription(offer);
 
-                            // Crée une offre SDP
-                            const offer = await pc.createOffer();
-                            await pc.setLocalDescription(offer);
+                                signalingServer.send(JSON.stringify({
+                                    type: 'offer',
+                                    offer: offer,
+                                    viewerId: data.viewerId
+                                }));
+                                console.log('[ADMIN-LIVE] offer -> viewer', data.viewerId);
 
-                            signalingServer.send(JSON.stringify({
-                                type: 'offer',
-                                offer: offer
-                            }));
+                                // Stocke la connexion par viewerId
+                                peerConnections.set(data.viewerId, pc);
+                            } else if (data.type === 'answer' && data.viewerId) {
+                                console.log('[ADMIN-LIVE] answer <- viewer', data.viewerId);
+                                const pc = peerConnections.get(data.viewerId);
+                                if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            } else if (data.type === 'candidate' && data.viewerId) {
+                                console.log('[ADMIN-LIVE] ICE <- viewer', data.viewerId);
+                                const pc = peerConnections.get(data.viewerId);
+                                if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                            }
+                        };
+                    }
 
-                            // Stocke la connexion, ici simplifié avec une clé statique
-                            peerConnections.set(data.viewerId, pc);
-                        } else if (data.type === 'answer') {
-                            const pc = peerConnections.get('viewerId');
-                            if (pc) await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                        } else if (data.type === 'candidate') {
-                            const pc = peerConnections.get('viewerId');
-                            if (pc) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    function connectSequential(i = 0) {
+                        if (i >= urls.length) {
+                            console.error('[ADMIN-LIVE] WS: toutes les tentatives ont échoué');
+                            return;
                         }
-                    };
+                        const url = urls[i];
+                        console.log('[ADMIN-LIVE] WS connecting', url);
+                        try {
+                            signalingServer = new WebSocket(url);
+                            signalingServer.onerror = () => {
+                                console.warn('[ADMIN-LIVE] WS error for', url, '→ next');
+                                connectSequential(i + 1);
+                            };
+                            attachHandlers();
+                        } catch (e) {
+                            console.error('[ADMIN-LIVE] WS init error for', url, e);
+                            connectSequential(i + 1);
+                        }
+                    }
+                    connectSequential();
                 })
                 .catch(err => {
-                    console.error('Erreur accès caméra:', err);
+                    console.error('[ADMIN-LIVE] Erreur accès caméra:', err);
                     alert("Impossible d’accéder à la caméra : " + err.message);
                 });
         });

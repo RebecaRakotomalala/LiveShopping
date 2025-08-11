@@ -73,14 +73,14 @@
 
             <div class="grid">
                 {% for live in followedLives %}
-                    <div class="card">
+                    <a class="card" href="{{ path('app_client_live', { id: live.id }) }}" style="text-decoration:none;">
                         <div class="thumb">
                             <img src="{{ live.thumbnail }}" alt="{{ live.title }}">
                             <div class="badge">{{ live.language }}</div>
                             <div class="viewer">{{ live.viewers }}</div>
                             <div class="username-chip">{{ live.username }}</div>
                         </div>
-                    </div>
+                    </a>
                 {% endfor %}
             </div>
         </div>
@@ -94,14 +94,14 @@
 
             <div class="grid">
                 {% for live in recommendedLives %}
-                    <div class="card">
+                    <a class="card" href="{{ path('app_client_live', { id: live.id }) }}" style="text-decoration:none;">
                         <div class="thumb">
                             <img src="{{ live.thumbnail }}" alt="{{ live.title }}">
                             <div class="badge">{{ live.language }}</div>
                             <div class="viewer">{{ live.viewers }}</div>
                             <div class="username-chip">{{ live.username }}</div>
                         </div>
-                    </div>
+                    </a>
                 {% endfor %}
             </div>
         </div>

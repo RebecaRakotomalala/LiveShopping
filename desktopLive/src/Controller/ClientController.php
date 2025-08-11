@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\CategoryRepository;
 use App\Repository\SaleRepository;
+use App\Repository\LiveRepository;
 use App\Repository\UsersRepository;
 use App\Entity\Users;
 use App\Entity\Live;
@@ -20,7 +21,8 @@ class ClientController extends AbstractController
     public function index(Request $request,
         CategoryRepository $categoryRepository,
         UsersRepository $usersRepository,
-        SaleRepository $saleRepository
+        SaleRepository $saleRepository,
+        LiveRepository $liveRepository
     ): Response
     {
         $session = $request->getSession();
@@ -35,63 +37,49 @@ class ClientController extends AbstractController
             return $this->redirectToRoute('app_connection');
         }
 
-        // Données mock pour l'affichage des lives (à remplacer plus tard par des données réelles)
-        $lives = [
-            [
-                'id' => 1,
-                'title' => 'Découverte Nouveautés',
-                'thumbnail' => '/uploads/6891e6164b5d5.jpg',
+        // Lives en cours depuis la base (endLive IS NULL)
+        $ongoingLives = $liveRepository->findOnGoingLives();
+
+        // Map vers une structure simple attendue par le template
+        $lives = array_map(function($live) {
+            /** @var \App\Entity\Live $live */
+            $seller = $live->getSeller();
+            return [
+                'id' => $live->getId(),
+                'title' => 'Live en cours',
+                'thumbnail' => '/uploads/' . ($seller && $seller->getImages() ? $seller->getImages() : '6891e6164b5d5.jpg'),
                 'language' => 'FR',
                 'viewers' => 200,
-                'username' => 'Username',
-            ],
-            [
-                'id' => 2,
-                'title' => 'Collection Automne',
-                'thumbnail' => '/uploads/6891f6e39d5a3.jpg',
-                'language' => 'FR',
-                'viewers' => 200,
-                'username' => 'Username',
-            ],
-            [
-                'id' => 3,
-                'title' => 'Bonnes affaires',
-                'thumbnail' => '/uploads/6891e6164b5d5.jpg',
-                'language' => 'FR',
-                'viewers' => 200,
-                'username' => 'Username',
-            ],
-            [
-                'id' => 4,
-                'title' => 'Découverte Nouveautés',
-                'thumbnail' => '/uploads/6891f6e39d5a3.jpg',
-                'language' => 'FR',
-                'viewers' => 200,
-                'username' => 'Username',
-            ],
-            [
-                'id' => 5,
-                'title' => 'Collection Automne',
-                'thumbnail' => '/uploads/6891e6164b5d5.jpg',
-                'language' => 'FR',
-                'viewers' => 200,
-                'username' => 'Username',
-            ],
-            [
-                'id' => 6,
-                'title' => 'Bonnes affaires',
-                'thumbnail' => '/uploads/6891f6e39d5a3.jpg',
-                'language' => 'FR',
-                'viewers' => 200,
-                'username' => 'Username',
-            ],
-        ];
+                'username' => $seller ? $seller->getUsername() : 'Username',
+            ];
+        }, $ongoingLives);
 
         return $this->render('client/index.html.twig', [
             'userId' => $user->getId(),
             'user' => $user,
             'followedLives' => $lives,
             'recommendedLives' => $lives,
+        ]);
+    }
+
+    #[Route('/client/live/{id}', name: 'app_client_live')]
+    public function live(Request $request, UsersRepository $usersRepository, LiveRepository $liveRepository, int $id): Response
+    {
+        $session = $request->getSession();
+        $userSession = $session->get('user');
+        $currentUser = null;
+        if ($userSession && isset($userSession['id'])) {
+            $currentUser = $usersRepository->find($userSession['id']);
+        }
+
+        $live = $liveRepository->find($id);
+        if (!$live || $live->getEndLive() !== null) {
+            return $this->redirectToRoute('app_client');
+        }
+
+        return $this->render('client/live.html.twig', [
+            'user' => $currentUser,
+            'live' => $live,
         ]);
     }
 }

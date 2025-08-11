@@ -4,6 +4,24 @@
 {% block title %}Connexion{% endblock %}
 
 {% block body %}
+    <style>
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0 16px;
+        }
+        .remember-me input[type="checkbox"] {
+            margin: 0;
+            width: 16px;
+            height: 16px;
+        }
+        .remember-me label {
+            margin: 0;
+            line-height: 1;
+            cursor: pointer;
+        }
+    </style>
     <div class="login-container">
         <h1>Sign <div class="text-color">In</div></h1>
         {% if log_message is defined %}

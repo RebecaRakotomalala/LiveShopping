@@ -87,6 +87,7 @@
         top: 0;
         left: 0;
         width: 100%;
+        z-index: 2000;
     }
     .nav-links {
         display: flex;
@@ -277,51 +278,34 @@
     }
 
     /* Dark theme */
-    body.dark-theme {
-        background-color: #121212;
-    }
+    body.dark-theme { background-color: #121212; }
+    html.dark-theme { background-color: #121212; }
 
-    body.dark-theme .navbar {
-        background: #ffffff;
-        color: black;
-    }
+    body.dark-theme .navbar { background: #231f20; color: #fff; }
 
     body.dark-theme .nav-links a,
     body.dark-theme .side-menu-links a {
         color: #567AF4;
     }
 
-    body.dark-theme .logo-shop {
-        color: #000;
-    }
+    body.dark-theme .logo-shop { color: #fff; }
 
-    body.dark-theme .search-bar {
-        background: #000;
-        color: #eee;
-        border: 1px solid #444;
-    }
+    body.dark-theme .search-bar { background: #2a2a2a; color: #eee; border: 1px solid #444; }
 
     body.dark-theme .icons svg {
         stroke: #567AF4;
     }
 
-    body.dark-theme .side-menu {
-        background: #ffffff;
-        box-shadow: -4px 0 8px rgba(0,0,0,0.1);
-    }
+    body.dark-theme .side-menu { background: #2b2b2b; box-shadow: -4px 0 8px rgba(0,0,0,0.3); }
 
     body.dark-theme .username,
-    body.dark-theme .theme-toggle-container {
-        color: white;
-    }
+    body.dark-theme .theme-toggle-container { color: #fff; }
 
     body.dark-theme .user-menu a {
         color: #567AF4;
     }
 
-    body.dark-theme .user-menu a:hover {
-        color: #000;
-    }
+    body.dark-theme .user-menu a:hover { color: #fff; }
 </style>
 
 <script>
@@ -330,16 +314,12 @@
         const sideMenu = document.getElementById('sideMenu');
         const themeToggle = document.getElementById('themeToggle');
 
-        const usernameElement = document.querySelector('.username');
-        let userId = 'guest';
-        if (usernameElement && usernameElement.textContent) {
-            userId = usernameElement.textContent.trim().toLowerCase().replace(/\s+/g, '_');
-        }
-        const userThemeKey = `user_theme_${userId}`;
+        // Utilise une clé globale cohérente avec le client
+        const userThemeKey = 'site_theme';
         const savedTheme = localStorage.getItem(userThemeKey);
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
-            themeToggle.checked = true;
+            if (themeToggle) themeToggle.checked = true;
         }
 
         burger.addEventListener('click', () => sideMenu.classList.toggle('active'));
@@ -350,10 +330,12 @@
             }
         });
 
-        themeToggle.addEventListener('change', () => {
-            const isDark = document.body.classList.toggle('dark-theme');
-            localStorage.setItem(userThemeKey, isDark ? 'dark' : 'light');
-        });
+        if (themeToggle) {
+            themeToggle.addEventListener('change', () => {
+                const isDark = document.body.classList.toggle('dark-theme');
+                localStorage.setItem(userThemeKey, isDark ? 'dark' : 'light');
+            });
+        }
 
         // Internationalisation
         const translations = {

@@ -27,8 +27,8 @@ let useHTTPS = false;
 try {
     // Essayer de charger les certificats
     server = https.createServer({
-        cert: fs.readFileSync('./192.168.88.21.pem'),
-        key: fs.readFileSync('./192.168.88.21-key.pem')
+        cert: fs.readFileSync('./192.168.88.40.pem'),  
+        key: fs.readFileSync('./192.168.88.40-key.pem')
     });
     useHTTPS = true;
     console.log('🔒 Mode HTTPS activé');

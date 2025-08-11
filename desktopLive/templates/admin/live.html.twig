@@ -45,7 +45,7 @@
             debugLog('🚀 Démarrage du streamer');
 
             // Initialiser WebSocket EN PREMIER
-            const signalingServer = new WebSocket('wss://192.168.88.21:9090');
+            const signalingServer = new WebSocket('wss://192.168.88.152:9090');
             const peerConnections = new Map();
             let localStream;
 
@@ -168,23 +168,27 @@
 
             // PUIS obtenir le stream local
             debugLog('🎥 Demande accès caméra...');
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(stream => {
-                    localStream = stream;
-                    const webcam = document.getElementById("webcamPreview");
-                    webcam.srcObject = stream;
-                    debugLog(`✅ Stream local obtenu: ${stream.getTracks().length} tracks`);
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        localStream = stream;
+                        const webcam = document.getElementById("webcamPreview");
+                        webcam.srcObject = stream;
+                        debugLog(`✅ Stream local obtenu: ${stream.getTracks().length} tracks`);
 
-                    stream.getTracks().forEach(track => {
-                        debugLog(`📹 Track disponible: ${track.kind} - ${track.label}`);
+                        stream.getTracks().forEach(track => {
+                            debugLog(`📹 Track disponible: ${track.kind} - ${track.label}`);
+                        });
+
+                        debugLog('🔄 Streamer prêt avec WebSocket et stream local');
+                    })
+                    .catch(err => {
+                        debugLog(`❌ Erreur accès caméra: ${err.message}`);
+                        alert("Impossible d'accéder à la caméra : " + err.message);
                     });
-
-                    debugLog('🔄 Streamer prêt avec WebSocket et stream local');
-                })
-                .catch(err => {
-                    debugLog(`❌ Erreur accès caméra: ${err.message}`);
-                    alert("Impossible d'accéder à la caméra : " + err.message);
-                });
+            } else {
+                debugLog("⚠️ getUserMedia non supporté dans ce navigateur ou contexte.");
+            }
         });
         </script>
     {% endif %}

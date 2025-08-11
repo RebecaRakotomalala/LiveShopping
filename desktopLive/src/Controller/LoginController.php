@@ -87,7 +87,7 @@ final class LoginController extends AbstractController
         return $this->json([
             'message' => 'Connexion réussie',
             'user' => [
-                'id' => $user->getId(),
+                'id_user' => $user->getId(),
                 'username' => $user->getUsername(),
                 'is_seller' => $user->isSeller(),
             ]

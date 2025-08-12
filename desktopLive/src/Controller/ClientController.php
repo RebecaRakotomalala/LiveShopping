@@ -44,13 +44,17 @@ class ClientController extends AbstractController
         $lives = array_map(function($live) {
             /** @var \App\Entity\Live $live */
             $seller = $live->getSeller();
+            // Image par défaut: icône utilisateur (silhouette) en SVG (data URI), neutre
+            $defaultThumbnail = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='100%25' height='100%25' fill='%23f0f0f0'/%3E%3Ccircle cx='320' cy='140' r='60' fill='%23bdbdbd'/%3E%3Cpath d='M220 270c0-55 50-90 100-90s100 35 100 90v20H220z' fill='%23bdbdbd'/%3E%3C/svg%3E";
+
             return [
                 'id' => $live->getId(),
                 'title' => 'Live en cours',
-                'thumbnail' => '/uploads/' . ($seller && $seller->getImages() ? $seller->getImages() : '6891e6164b5d5.jpg'),
+                'thumbnail' => ($seller && $seller->getImages()) ? ('/uploads/' . $seller->getImages()) : $defaultThumbnail,
                 'language' => 'FR',
                 'viewers' => 200,
                 'username' => $seller ? $seller->getUsername() : 'Username',
+                'isLive' => $live->getEndLive() === null,
             ];
         }, $ongoingLives);
 

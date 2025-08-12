@@ -48,8 +48,20 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        // Redirection après succès de la connexion
-        return new RedirectResponse($this->urlGenerator->generate('app_dashboard')); // ou autre route
+        if ($request->attributes->get('from_registration')) {
+
+            $session = $request->getSession();
+
+            /** @var \App\Entity\Users $user */
+            $user = $token->getUser();
+            $session->set('user', $user);
+
+            if ($request->attributes->get('is_seller')) {
+                return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
+            } else {
+                return new RedirectResponse($this->urlGenerator->generate('app_client'));
+            }
+        }
     }
 
     protected function getLoginUrl(Request $request): string

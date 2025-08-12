@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Users;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Service\InscriptionService;
 use App\Form\InscriptionFormType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -83,8 +86,14 @@ final class InscriptionController extends AbstractController
         return $this->json([
             'message' => 'Inscription réussie',
             'user' => [
-                'id' => $user->getId(),
-                'username' => $user->getUsername()
+                'id_user' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'contact' => $user->getContact(),
+                'address' => $user->getAddress(),
+                'country' => $user->getCountry(),
+                'image' => $user->getImages(),
+                'is_seller' => $user->isSeller(),
             ]
         ], 201);
     }

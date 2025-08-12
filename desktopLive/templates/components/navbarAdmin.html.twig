@@ -12,12 +12,14 @@
 
     <div class="right-group">
         <div class="icons">
-            <a href="{{ path('app_live') }}" class="icon" title="Start Live" aria-label="Start Live">
-                <!-- Start Live Icon -->
-                <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
-                    <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
-                </svg>
+            <a href="{{ path('admin_live_form') }}" class="icon" title="Démarrer le live">
+                <span class="icon">
+                    <!-- Start Live Icon -->
+                    <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="19" cy="19" r="18" stroke="#567AF4" stroke-width="2"/>
+                        <path d="M15 12L26 19L15 26V12Z" fill="#567AF4"/>
+                    </svg>
+                </span>
             </a>
             <span class="icon">
                 <!-- Bulle -->
@@ -47,7 +49,7 @@
     <div class="side-menu" id="sideMenu">
         <div class="user-profile">
             <div class="user-menu">
-                <a href="{{ path('app_admin_profil') }}" data-i18n="profile">Your profile</a>
+                <a href="/users/profil" data-i18n="profile">Your profile</a>
                 <div class="theme-toggle-container">
                     <a data-i18n="theme">Theme change</a>
                     <label class="theme-toggle">
@@ -62,7 +64,7 @@
                         <img src="https://flagcdn.com/gb.svg" alt="English" width="20" class="lang-flag" data-lang="en" style="cursor:pointer;">
                     </div>
                 </div>
-                <a href="{{ path('app_logout') }}" data-i18n="logout">Log out</a>
+                <a href="#" data-i18n="logout">Log out</a>
             </div>
         </div>
         <div class="side-menu-links">
@@ -87,7 +89,6 @@
         top: 0;
         left: 0;
         width: 100%;
-        z-index: 2000;
     }
     .nav-links {
         display: flex;
@@ -278,34 +279,51 @@
     }
 
     /* Dark theme */
-    body.dark-theme { background-color: #121212; }
-    html.dark-theme { background-color: #121212; }
+    body.dark-theme {
+        background-color: #121212;
+    }
 
-    body.dark-theme .navbar { background: #231f20; color: #fff; }
+    body.dark-theme .navbar {
+        background: #ffffff;
+        color: black;
+    }
 
     body.dark-theme .nav-links a,
     body.dark-theme .side-menu-links a {
         color: #567AF4;
     }
 
-    body.dark-theme .logo-shop { color: #fff; }
+    body.dark-theme .logo-shop {
+        color: #000;
+    }
 
-    body.dark-theme .search-bar { background: #2a2a2a; color: #eee; border: 1px solid #444; }
+    body.dark-theme .search-bar {
+        background: #000;
+        color: #eee;
+        border: 1px solid #444;
+    }
 
     body.dark-theme .icons svg {
         stroke: #567AF4;
     }
 
-    body.dark-theme .side-menu { background: #2b2b2b; box-shadow: -4px 0 8px rgba(0,0,0,0.3); }
+    body.dark-theme .side-menu {
+        background: #ffffff;
+        box-shadow: -4px 0 8px rgba(0,0,0,0.1);
+    }
 
     body.dark-theme .username,
-    body.dark-theme .theme-toggle-container { color: #fff; }
+    body.dark-theme .theme-toggle-container {
+        color: white;
+    }
 
     body.dark-theme .user-menu a {
         color: #567AF4;
     }
 
-    body.dark-theme .user-menu a:hover { color: #fff; }
+    body.dark-theme .user-menu a:hover {
+        color: #000;
+    }
 </style>
 
 <script>
@@ -314,12 +332,16 @@
         const sideMenu = document.getElementById('sideMenu');
         const themeToggle = document.getElementById('themeToggle');
 
-        // Utilise une clé globale cohérente avec le client
-        const userThemeKey = 'site_theme';
+        const usernameElement = document.querySelector('.username');
+        let userId = 'guest';
+        if (usernameElement && usernameElement.textContent) {
+            userId = usernameElement.textContent.trim().toLowerCase().replace(/\s+/g, '_');
+        }
+        const userThemeKey = `user_theme_${userId}`;
         const savedTheme = localStorage.getItem(userThemeKey);
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
-            if (themeToggle) themeToggle.checked = true;
+            themeToggle.checked = true;
         }
 
         burger.addEventListener('click', () => sideMenu.classList.toggle('active'));
@@ -330,12 +352,10 @@
             }
         });
 
-        if (themeToggle) {
-            themeToggle.addEventListener('change', () => {
-                const isDark = document.body.classList.toggle('dark-theme');
-                localStorage.setItem(userThemeKey, isDark ? 'dark' : 'light');
-            });
-        }
+        themeToggle.addEventListener('change', () => {
+            const isDark = document.body.classList.toggle('dark-theme');
+            localStorage.setItem(userThemeKey, isDark ? 'dark' : 'light');
+        });
 
         // Internationalisation
         const translations = {

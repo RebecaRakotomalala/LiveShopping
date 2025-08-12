@@ -34,7 +34,7 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 500)]
     private ?string $country = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type:'text', nullable: true)]
     private ?string $images = null;
 
     #[ORM\Column(type: 'boolean')]

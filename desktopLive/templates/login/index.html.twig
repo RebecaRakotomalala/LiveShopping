@@ -5,6 +5,7 @@
 
 {% block theme_bootstrap %}{% endblock %}
 
+
 {% block body %}
     <style>
         .remember-me {
@@ -25,7 +26,7 @@
         }
     </style>
     <div class="login-container">
-        <h1>Sign <div class="text-color">In</div></h1>
+        <h1>Sign<div class="text-color">In</div></h1>
         {% if log_message is defined %}
             <script>
                 console.log("{{ log_message|e('js') }}");

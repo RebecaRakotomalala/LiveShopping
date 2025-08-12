@@ -21,7 +21,21 @@ class BagDetails
     #[ORM\JoinColumn(name: 'id_bag', referencedColumnName: 'id_bag', nullable: false)]
     private ?Bag $bag = null;
 
+    #[ORM\Column(type: 'decimal', precision: 15, scale: 2)]
+    private ?string $price = null;
+
     // Getters & Setters
+
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(string $price): static
+    {
+        $this->price = $price;
+        return $this;
+    }
 
     public function getId(): ?int
     {

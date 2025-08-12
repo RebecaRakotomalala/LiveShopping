@@ -1,11 +1,12 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require('path');
 
-/**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
- */
-const config = {};
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+// Ajoute un alias vide pour éviter l'erreur sur PickerIOS
+defaultConfig.resolver.extraNodeModules = {
+  ...(defaultConfig.resolver.extraNodeModules || {}),
+  './PickerIOS': path.resolve(__dirname, 'emptyModule.js'),
+};
+
+module.exports = mergeConfig(defaultConfig, {});

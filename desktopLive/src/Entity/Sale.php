@@ -13,7 +13,7 @@ class Sale
     #[ORM\Column(name: "id_sale")]
     private ?int $id = null;
 
-    #[ORM\Column(name: "sale_date")]
+    #[ORM\Column(name: 'sale_date', type: 'date')]
     private ?\DateTimeInterface $saleDate = null;
 
     #[ORM\Column(name: "is_paid")]

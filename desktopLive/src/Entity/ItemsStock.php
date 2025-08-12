@@ -16,7 +16,7 @@ class ItemsStock
     #[ORM\Column(name: 'out_item', type: 'integer', nullable: true)]
     private ?int $outItem = null;
 
-    #[ORM\Column(name: 'in_item', length: 50, nullable: true)]
+    #[ORM\Column(name: 'in_item', type: 'integer', nullable: true)]
     private ?string $inItem = null;
 
     #[ORM\Column(name: 'date_move', type: 'datetime')]

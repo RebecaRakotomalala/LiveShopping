@@ -22,6 +22,12 @@ class Live
     #[ORM\Column(name: 'nbr_like', type: 'integer', nullable: true)]
     private ?int $nbrLike = null;
 
+    #[ORM\Column(name: 'titre', type: 'string', length: 255, nullable: true)]
+    private ?string $titre = null;
+
+    #[ORM\Column(name: 'description', type: 'text', nullable: true)]
+    private ?string $description = null;
+
     #[ORM\ManyToOne(targetEntity: Users::class)]
     #[ORM\JoinColumn(name: 'id_seller', referencedColumnName: 'id_user', nullable: false)]
     private ?Users $seller = null;
@@ -63,6 +69,28 @@ class Live
     public function setNbrLike(?int $nbrLike): static
     {
         $this->nbrLike = $nbrLike;
+        return $this;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(string $titre): static
+    {
+        $this->titre = $titre;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
         return $this;
     }
 

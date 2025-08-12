@@ -6,9 +6,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\CategoryRepository;
+use App\Repository\ItemRepository;
 use App\Repository\SaleRepository;
 use App\Repository\UsersRepository;
-use App\Entity\Users;
+use App\Entity\LiveDetails;
 use App\Entity\Live;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,8 @@ class AdminController extends AbstractController
 {
     public function __construct(
         private SaleRepository $saleRepository,
-        private UsersRepository $userRepository
+        private UsersRepository $userRepository,
+        private ItemRepository $itemRepository
     ) {}
 
     #[Route('/dashboard', name: 'app_dashboard')]
@@ -140,32 +142,58 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/liveStart', name: 'admin_live_start')]
-    public function startLive(Request $request, EntityManagerInterface $em, UsersRepository $usersRepository): Response
-    {
-        $session = $request->getSession();
-        $user = $session->get('user');
-        $userID = $usersRepository->find($user->getId());
-        $user = $usersRepository->find($userID);
-
-        // Vérifie si un live est déjà actif
-        $activeLive = $em->getRepository(Live::class)->findOneBy([
-            'seller' => $user,
-            'endLive' => null
+    #[Route('/liveStart', name: 'admin_live_form')]
+    public function startLiveSelect(
+        Request $request,
+        ItemRepository $itemRepository
+    ): Response {
+        $items = $itemRepository->findAvailableItems();
+        return $this->render('admin/liveForm.html.twig', [
+            'items' => $items
         ]);
+    }
 
-        if ($activeLive) {
-            $this->addFlash('warning', 'Un live est déjà en cours.');
-            return $this->redirectToRoute('app_live');
+    #[Route('/liveConfirm', name: 'admin_live_confirm', methods: ['POST'])]
+    public function confirmLive(
+        Request $request,
+        EntityManagerInterface $em,
+        UsersRepository $usersRepository,
+        ItemRepository $itemRepository
+    ): Response {
+        $session = $request->getSession();
+        $user = $usersRepository->find($session->get('user')->getId());
+
+        // Récupérer les données du formulaire
+        $titre = $request->request->get('titre');
+        $description = $request->request->get('description');
+        $selectedItems = $request->request->all('items');
+        if (!is_array($selectedItems)) {
+            $selectedItems = [];
         }
 
+        // Créer et remplir l'entité Live
         $live = new Live();
         $live->setStartLive(new \DateTime());
         $live->setSeller($user);
+        $live->setTitre($titre);
+        $live->setDescription($description);
         $em->persist($live);
         $em->flush();
 
-        return $this->redirectToRoute('app_live');
+        // Insérer dans LiveDetails chaque item choisi
+        foreach ($selectedItems as $itemId) {
+            $item = $itemRepository->find($itemId);
+            if ($item) {
+                $liveDetail = new LiveDetails();
+                $liveDetail->setLive($live);
+                $liveDetail->setItem($item);
+                $em->persist($liveDetail);
+            }
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('app_live', ['id' => $live->getId()]);
     }
 
     #[Route('/stopLive/{id}', name: 'admin_live_stop')]
@@ -203,6 +231,8 @@ class AdminController extends AbstractController
         return $this->render('admin/live.html.twig', [
             'live' => $activeLive,
             'seller' => $user,
+            'titre' => $activeLive?->getTitre(),
+            'description' => $activeLive?->getDescription(),
         ]);
     }
 }

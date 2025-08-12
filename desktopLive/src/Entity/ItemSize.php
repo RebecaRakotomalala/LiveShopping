@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\ItemSizeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: ItemSizeRepository::class)]
 class ItemSize
@@ -24,8 +26,20 @@ class ItemSize
     #[ORM\JoinColumn(name: 'id_item', referencedColumnName: 'id_item', nullable: false)]
     private ?Item $item = null;
 
-    // Getters et setters
+    #[ORM\OneToMany(mappedBy: 'itemSize', targetEntity: ItemsStock::class)]
+    private Collection $stocks;
 
+    public function __construct()
+    {
+        $this->stocks = new ArrayCollection();
+    }
+
+    // Getters et setters
+    public function getStocks(): Collection
+    {
+        return $this->stocks;
+    }
+    
     public function getId(): ?int
     {
         return $this->id;

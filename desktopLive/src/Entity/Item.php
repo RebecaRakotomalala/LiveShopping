@@ -32,11 +32,30 @@ class Item
     #[ORM\OneToMany(mappedBy: 'item', targetEntity: PriceItems::class, orphanRemoval: true)]
     private Collection $priceItems;
 
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: ItemSize::class)]
+    private Collection $itemSizes;
+
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: Promotion::class)]
+    private Collection $promotions;
+
     // Getters et setters
 
     public function __construct()
     {
         $this->priceItems = new ArrayCollection();
+        $this->itemSizes = new ArrayCollection();
+        $this->promotions = new ArrayCollection();
+    }
+
+    // Getters et setters
+    public function getPromotions(): Collection
+    {
+        return $this->promotions;
+    }
+
+    public function getItemSizes(): Collection
+    {
+        return $this->itemSizes;
     }
 
     /**

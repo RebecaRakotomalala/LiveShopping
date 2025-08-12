@@ -86,8 +86,14 @@ final class InscriptionController extends AbstractController
         return $this->json([
             'message' => 'Inscription réussie',
             'user' => [
-                'id' => $user->getId(),
-                'username' => $user->getUsername()
+                'id_user' => $user->getId(),
+                'username' => $user->getUsername(),
+                'email' => $user->getEmail(),
+                'contact' => $user->getContact(),
+                'address' => $user->getAddress(),
+                'country' => $user->getCountry(),
+                'image' => $user->getImages(),
+                'is_seller' => $user->isSeller(),
             ]
         ], 201);
     }

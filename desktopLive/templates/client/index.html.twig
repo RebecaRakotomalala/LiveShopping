@@ -37,7 +37,12 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             debugLog(`🚀 Viewer démarré: ID = ${viewerId}`);
+<<<<<<< HEAD
             const signalingServer = new WebSocket('ws://localhost:9090');
+=======
+
+            const signalingServer = new WebSocket("wss://192.168.88.152:9090");
+>>>>>>> e26c0ccad8775036345dd4a33578fe1cb727edf4
             let peerConnection;
             const statusDiv = document.getElementById('status');
             const playButton = document.getElementById('playButton');

@@ -28,11 +28,11 @@ class ClientController extends AbstractController
         $session = $request->getSession();
         $userSession = $session->get('user');
 
-        if (!$userSession || !isset($userSession['id'])) {
+        if (!$userSession) {
             return $this->redirectToRoute('app_connection');
         }
 
-        $user = $usersRepository->find($userSession['id']);
+        $user = $usersRepository->find($userSession->getId());
         if (!$user) {
             return $this->redirectToRoute('app_connection');
         }
@@ -72,8 +72,8 @@ class ClientController extends AbstractController
         $session = $request->getSession();
         $userSession = $session->get('user');
         $currentUser = null;
-        if ($userSession && isset($userSession['id'])) {
-            $currentUser = $usersRepository->find($userSession['id']);
+        if ($userSession) {
+            $currentUser = $usersRepository->find($userSession->getId());
         }
 
         $live = $liveRepository->find($id);

@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250801153439 extends AbstractMigration
+final class Version20250812104142 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,11 +20,11 @@ final class Version20250801153439 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE Users (id_user SERIAL NOT NULL, email VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, password VARCHAR(500) NOT NULL, contact VARCHAR(10) NOT NULL, address VARCHAR(255) NOT NULL, country VARCHAR(500) NOT NULL, images BIGINT DEFAULT NULL, is_seller BOOLEAN NOT NULL, PRIMARY KEY(id_user))');
+        $this->addSql('CREATE TABLE Users (id_user SERIAL NOT NULL, email VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL, password VARCHAR(500) NOT NULL, contact VARCHAR(10) NOT NULL, address VARCHAR(255) NOT NULL, country VARCHAR(500) NOT NULL, images TEXT DEFAULT NULL, is_seller BOOLEAN NOT NULL, PRIMARY KEY(id_user))');
         $this->addSql('CREATE TABLE bag (id_bag SERIAL NOT NULL, id_client INT NOT NULL, id_seller INT NOT NULL, create_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, is_commande BOOLEAN DEFAULT NULL, PRIMARY KEY(id_bag))');
         $this->addSql('CREATE INDEX IDX_1B226841E173B1B8 ON bag (id_client)');
         $this->addSql('CREATE INDEX IDX_1B226841DD2D6611 ON bag (id_seller)');
-        $this->addSql('CREATE TABLE bag_details (id_bag_detail SERIAL NOT NULL, id_item_size INT NOT NULL, id_bag INT NOT NULL, PRIMARY KEY(id_bag_detail))');
+        $this->addSql('CREATE TABLE bag_details (id_bag_detail SERIAL NOT NULL, id_item_size INT NOT NULL, id_bag INT NOT NULL, price NUMERIC(15, 2) NOT NULL, PRIMARY KEY(id_bag_detail))');
         $this->addSql('CREATE INDEX IDX_65428A8BFC5DCB6 ON bag_details (id_item_size)');
         $this->addSql('CREATE INDEX IDX_65428A88586801B ON bag_details (id_bag)');
         $this->addSql('CREATE TABLE category (id_category SERIAL NOT NULL, name_category VARCHAR(255) NOT NULL, description TEXT DEFAULT NULL, PRIMARY KEY(id_category))');
@@ -39,17 +39,17 @@ final class Version20250801153439 extends AbstractMigration
         $this->addSql('CREATE TABLE follow_seller (id_follow SERIAL NOT NULL, id_client INT NOT NULL, id_seller INT NOT NULL, date_following TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id_follow))');
         $this->addSql('CREATE INDEX IDX_D0BB6D84E173B1B8 ON follow_seller (id_client)');
         $this->addSql('CREATE INDEX IDX_D0BB6D84DD2D6611 ON follow_seller (id_seller)');
-        $this->addSql('CREATE TABLE item (id_item SERIAL NOT NULL, id_seller INT NOT NULL, id_category INT NOT NULL, images BIGINT DEFAULT NULL, name_item VARCHAR(255) NOT NULL, PRIMARY KEY(id_item))');
+        $this->addSql('CREATE TABLE item (id_item SERIAL NOT NULL, id_seller INT NOT NULL, id_category INT NOT NULL, images VARCHAR(500) DEFAULT NULL, name_item VARCHAR(255) NOT NULL, PRIMARY KEY(id_item))');
         $this->addSql('CREATE INDEX IDX_1F1B251EDD2D6611 ON item (id_seller)');
         $this->addSql('CREATE INDEX IDX_1F1B251E5697F554 ON item (id_category)');
         $this->addSql('CREATE TABLE item_size (id_item_size SERIAL NOT NULL, id_size INT NOT NULL, id_item INT NOT NULL, value_size VARCHAR(50) DEFAULT NULL, PRIMARY KEY(id_item_size))');
         $this->addSql('CREATE INDEX IDX_3FF060917CE03868 ON item_size (id_size)');
         $this->addSql('CREATE INDEX IDX_3FF06091943B391C ON item_size (id_item)');
-        $this->addSql('CREATE TABLE items_stock (id_item_stock SERIAL NOT NULL, id_item_size INT NOT NULL, out_item INT DEFAULT NULL, in_item VARCHAR(50) DEFAULT NULL, date_move TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id_item_stock))');
+        $this->addSql('CREATE TABLE items_stock (id_item_stock SERIAL NOT NULL, id_item_size INT NOT NULL, out_item INT DEFAULT NULL, in_item INT DEFAULT NULL, date_move TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id_item_stock))');
         $this->addSql('CREATE INDEX IDX_4FEA9CDBBFC5DCB6 ON items_stock (id_item_size)');
         $this->addSql('CREATE TABLE liaison_notification (id_liaison SERIAL NOT NULL, id_notification INT NOT NULL, name_table VARCHAR(50) NOT NULL, id_table INT NOT NULL, PRIMARY KEY(id_liaison))');
         $this->addSql('CREATE INDEX IDX_11C7F5259C9503B8 ON liaison_notification (id_notification)');
-        $this->addSql('CREATE TABLE live (id_live SERIAL NOT NULL, id_seller INT NOT NULL, start_live TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_live TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, nbr_like INT DEFAULT NULL, PRIMARY KEY(id_live))');
+        $this->addSql('CREATE TABLE live (id_live SERIAL NOT NULL, id_seller INT NOT NULL, start_live TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, end_live TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, nbr_like INT DEFAULT NULL, titre VARCHAR(255) DEFAULT NULL, description TEXT DEFAULT NULL, PRIMARY KEY(id_live))');
         $this->addSql('CREATE INDEX IDX_530F2CAFDD2D6611 ON live (id_seller)');
         $this->addSql('CREATE TABLE live_details (id_live_detail SERIAL NOT NULL, id_item INT NOT NULL, id_live INT NOT NULL, PRIMARY KEY(id_live_detail))');
         $this->addSql('CREATE INDEX IDX_F3FB4BF1943B391C ON live_details (id_item)');
@@ -62,7 +62,7 @@ final class Version20250801153439 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_CAD7E12D943B391C ON price_items (id_item)');
         $this->addSql('CREATE TABLE promotion (id_promotion SERIAL NOT NULL, id_item INT NOT NULL, name_promotion VARCHAR(255) NOT NULL, description TEXT DEFAULT NULL, percentage NUMERIC(15, 2) NOT NULL, start_date DATE NOT NULL, end_date DATE DEFAULT NULL, PRIMARY KEY(id_promotion))');
         $this->addSql('CREATE INDEX IDX_C11D7DD1943B391C ON promotion (id_item)');
-        $this->addSql('CREATE TABLE sale (id_sale SERIAL NOT NULL, id_commande INT NOT NULL, sale_date VARCHAR(255) NOT NULL, is_paid BOOLEAN NOT NULL, PRIMARY KEY(id_sale))');
+        $this->addSql('CREATE TABLE sale (id_sale SERIAL NOT NULL, id_commande INT NOT NULL, sale_date DATE NOT NULL, is_paid BOOLEAN NOT NULL, PRIMARY KEY(id_sale))');
         $this->addSql('CREATE INDEX IDX_E54BC0053E314AE8 ON sale (id_commande)');
         $this->addSql('CREATE TABLE size (id_size SERIAL NOT NULL, name_size VARCHAR(255) NOT NULL, PRIMARY KEY(id_size))');
         $this->addSql('CREATE TABLE state_commande (id_state SERIAL NOT NULL, name_state VARCHAR(255) NOT NULL, PRIMARY KEY(id_state))');
